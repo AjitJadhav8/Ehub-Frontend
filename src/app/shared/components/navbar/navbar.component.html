@@ -1,0 +1,14 @@
+<!-- simple navbar template (src/app/shared/components/navbar/navbar.component.html) -->
+<nav class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-4 flex justify-between items-center">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-white/20 rounded flex items-center justify-center text-white">
+      <i class="fas fa-comments"></i>
+    </div>
+    <div class="font-semibold">Engagement Hub</div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <div class="text-sm font-medium">John Doe</div>
+    <button class="text-sm px-3 py-1 bg-white/10 rounded" (click)="logout()">Logout</button>
+  </div>
+</nav>
