@@ -1,1 +1,1465 @@
-<p>dashboard works!</p>
+<!-- <app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-5">
+  <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 md:p-5 mb-4 md:mb-5 shadow-soft">
+    <h1 class="text-lg md:text-xl font-bold mb-1 tracking-tight text-gray-800">
+      Customer Dashboard
+    </h1>
+    <p class="text-gray-700 text-xs md:text-sm">
+      Select a customer to explore engagement insights.
+    </p>
+  </div>
+
+  <div
+    class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 md:mb-5"
+  >
+    <div class="flex w-full md:flex-1 md:max-w-lg">
+      <div class="relative flex-1">
+        <input
+          [(ngModel)]="query"
+          type="text"
+          placeholder="Search customers..."
+          class="w-full p-2.5 border border-gray-border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm pl-10"
+        />
+
+        <svg
+          class="absolute left-3 top-3 h-4 w-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+
+      <button
+        (click)="onSearch()"
+        class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2.5 px-3 md:px-4 rounded-r-lg font-medium text-sm shadow-md hover:from-blue-600 hover:to-indigo-700 transition duration-200"
+      >
+        Search
+      </button>
+    </div>
+
+    <button
+      (click)="openAddModal()"
+      class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2.5 px-3 md:px-4 rounded-lg font-medium text-sm shadow-md flex items-center gap-2 w-full md:w-auto justify-center md:justify-start hover:from-blue-600 hover:to-indigo-700 transition duration-200"
+    >
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      New Customer
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-16">
+    <div
+      class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mb-4"
+    ></div>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Loading Customers</h3>
+    <p class="text-gray-600 text-sm">
+      Please wait while we fetch your customer data...
+    </p>
+  </div>
+
+  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+    <div class="flex items-center">
+      <svg
+        class="h-5 w-5 text-red-400 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <p class="text-red-700 text-sm">{{ error }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+    <div
+      *ngFor="let c of filteredCustomers()"
+      class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200 cursor-pointer shadow-soft hover:-translate-y-0.5 hover:shadow-md hover:border-blue-400 transition duration-200"
+    >
+      <div class="flex justify-between items-start">
+        <div class="font-semibold text-sm mb-0.5 text-gray-800 truncate pr-2">
+          {{ c.name }}
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            (click)="openEditModal(c); $event.stopPropagation()"
+            class="text-blue-500 hover:text-blue-700 transition p-1"
+          >
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 20h9"></path>
+              <path
+                d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"
+              ></path>
+            </svg>
+          </button>
+
+          <button
+            (click)="deleteCustomer(c.customer_id); $event.stopPropagation()"
+            class="text-red-500 hover:text-red-700 transition p-1 disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="deletingId === c.customer_id"
+          >
+            <ng-container *ngIf="deletingId === c.customer_id; else deleteIcon">
+              <svg
+                class="h-4 w-4 animate-spin"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  d="M4 12a8 8 0 018-8"
+                  stroke-linecap="round"
+                ></path>
+              </svg>
+            </ng-container>
+            <ng-template #deleteIcon>
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M9 6V4h6v2"></path>
+              </svg>
+            </ng-template>
+          </button>
+        </div>
+      </div>
+
+      <div class="text-gray-700 text-xs mt-1">
+        {{ c.industry }} • {{ c.employees }} employees • {{ c.location }}
+      </div>
+
+      <div class="mt-2 flex justify-end">
+        <div
+          class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs"
+        >
+          <svg
+            class="h-3 w-3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="13 6 19 12 13 18"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="!loading && !error && filteredCustomers().length === 0"
+    class="text-center py-12"
+  >
+    <div
+      class="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4"
+    >
+      <svg
+        class="w-8 h-8 text-blue-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+        />
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No customers found</h3>
+    <p class="text-gray-600 text-sm mb-4">
+      {{ query ? 'Try a different search' : 'Add your first customer to get started' }}
+    </p>
+    <button
+      (click)="openAddModal()"
+      class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm shadow-md inline-flex items-center gap-2 hover:from-blue-600 hover:to-indigo-700"
+    >
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Add Customer
+    </button>
+  </div>
+
+  <div
+    *ngIf="showModal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+  >
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div
+        class="sticky top-0 bg-white p-5 border-b border-gray-border flex justify-between items-center rounded-t-xl"
+      >
+        <h2 class="text-lg font-semibold text-gray-800">
+          {{ isEditing ? 'Edit Customer' : 'Add New Customer' }}
+        </h2>
+
+        <button
+          class="text-gray-500 hover:text-gray-700 transition disabled:opacity-50"
+          (click)="closeModal()"
+          [disabled]="modalLoading"
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+          <input
+            [(ngModel)]="name"
+            placeholder="Enter company name"
+            required
+            [disabled]="modalLoading"
+            class="w-full p-2.5 border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+          <input
+            [(ngModel)]="industry"
+            placeholder="Enter industry"
+            required
+            [disabled]="modalLoading"
+            class="w-full p-2.5 border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Employees</label>
+            <input
+              [(ngModel)]="employees"
+              type="number"
+              placeholder="Number of employees"
+              [disabled]="modalLoading"
+              class="w-full p-2.5 border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input
+              [(ngModel)]="location"
+              placeholder="City, Country"
+              [disabled]="modalLoading"
+              class="w-full p-2.5 border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Overview</label>
+          <textarea
+            [(ngModel)]="overview"
+            rows="3"
+            placeholder="Customer overview or description"
+            [disabled]="modalLoading"
+            class="w-full p-2.5 border border-gray-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+          ></textarea>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <button
+            (click)="closeModal()"
+            [disabled]="modalLoading"
+            class="bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-gray-300 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-2 sm:order-1"
+          >
+            Cancel
+          </button>
+
+          <button
+            (click)="submit()"
+            [disabled]="modalLoading"
+            class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm shadow-md hover:from-blue-600 hover:to-indigo-700 transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed order-1 sm:order-2"
+          >
+            <div class="flex items-center justify-center gap-2">
+              <svg
+                *ngIf="modalLoading"
+                class="h-4 w-4 animate-spin"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  d="M4 12a8 8 0 018-8"
+                  stroke-linecap="round"
+                ></path>
+              </svg>
+              <span>
+                {{
+                  isEditing
+                    ? (modalLoading ? 'Updating...' : 'Update Customer')
+                    : (modalLoading ? 'Saving...' : 'Save Customer')
+                }}
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+
+<!-- second -->
+<!-- <app-navbar></app-navbar>
+
+
+<div class="min-h-screen p-4 md:p-5" style="font-family: 'Poppins', sans-serif;">
+  <div class="bg-white rounded-xl p-4 md:p-5 mb-4 md:mb-5" style="box-shadow: 0 4px 12px rgba(247, 127, 190, 0.15); border: 1px solid #F77FBE;">
+    <h1 class="text-lg md:text-xl font-bold mb-1 tracking-tight" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 700;">
+      Customer Dashboard
+    </h1>
+    <p class="text-xs md:text-sm" style="color: #432338; font-family: 'Poppins', sans-serif; font-weight: 400;">
+      Select a customer to explore engagement insights.
+    </p>
+  </div>
+
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 md:mb-5">
+    <div class="flex w-full md:flex-1 md:max-w-lg">
+      <div class="relative flex-1">
+        <input
+          [(ngModel)]="query"
+          type="text"
+          placeholder="Search customers..."
+          class="w-full p-2.5 rounded-l-xl focus:outline-none text-sm pl-10"
+          style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338;"
+        />
+
+        <svg
+          class="absolute left-3 top-3 h-4 w-4"
+          style="color: #F77FBE;"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+
+      <button
+        (click)="onSearch()"
+        class="text-white py-2.5 px-3 md:px-4 rounded-r-xl font-medium text-sm transition duration-200"
+        style="background: #F77FBE; font-family: 'Poppins', sans-serif; box-shadow: 0 2px 8px rgba(247, 127, 190, 0.3);"
+        onmouseover="this.style.background='#FF80BA'"
+        onmouseout="this.style.background='#F77FBE'"
+      >
+        Search
+      </button>
+    </div>
+
+    <button
+      (click)="openAddModal()"
+      class="text-white py-2.5 px-3 md:px-4 rounded-xl font-medium text-sm flex items-center gap-2 w-full md:w-auto justify-center md:justify-start transition duration-200"
+      style="background: #F77FBE; font-family: 'Poppins', sans-serif; box-shadow: 0 2px 8px rgba(247, 127, 190, 0.3);"
+      onmouseover="this.style.background='#FF80BA'"
+      onmouseout="this.style.background='#F77FBE'"
+    >
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      New Customer
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-16">
+    <div
+      class="inline-block animate-spin rounded-full h-12 w-12 border-4 mb-4"
+      style="border-color: #FFE1F7; border-top-color: #F77FBE;"
+    ></div>
+    <h3 class="text-lg font-semibold mb-2" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 700;">
+      Loading Customers
+    </h3>
+    <p class="text-sm" style="color: #432338; font-family: 'Poppins', sans-serif;">
+      Please wait while we fetch your customer data...
+    </p>
+  </div>
+
+  <div *ngIf="error && !loading" class="rounded-xl p-4 mb-4" style="background: #FFE1F7; border: 1px solid #F77FBE;">
+    <div class="flex items-center">
+      <svg
+        class="h-5 w-5 mr-2"
+        style="color: #F77FBE;"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <p class="text-sm" style="color: #432338; font-family: 'Poppins', sans-serif;">{{ error }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+    <div
+      *ngFor="let c of filteredCustomers()"
+      class="bg-white rounded-xl p-3 cursor-pointer transition duration-200"
+      style="border: 1px solid #F77FBE; box-shadow: 0 4px 12px rgba(247, 127, 190, 0.15); font-family: 'Poppins', sans-serif;"
+      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(247, 127, 190, 0.25)'"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(247, 127, 190, 0.15)'"
+    >
+      <div class="flex justify-between items-start">
+        <div class="font-semibold text-sm mb-0.5 truncate pr-2" style="color: #371A2D; font-weight: 700;">
+          {{ c.name }}
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            (click)="openEditModal(c); $event.stopPropagation()"
+            class="transition p-1"
+            style="color: #9348D4;"
+            onmouseover="this.style.color='#8B80DA'"
+            onmouseout="this.style.color='#9348D4'"
+          >
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"></path>
+            </svg>
+          </button>
+
+          <button
+            (click)="deleteCustomer(c.customer_id); $event.stopPropagation()"
+            class="transition p-1 disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="deletingId === c.customer_id"
+            style="color: #FFB6B3;"
+            onmouseover="this.style.color='#FF80BA'"
+            onmouseout="this.style.color='#FFB6B3'"
+          >
+            <ng-container *ngIf="deletingId === c.customer_id; else deleteIcon">
+              <svg
+                class="h-4 w-4 animate-spin"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  d="M4 12a8 8 0 018-8"
+                  stroke-linecap="round"
+                ></path>
+              </svg>
+            </ng-container>
+            <ng-template #deleteIcon>
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M9 6V4h6v2"></path>
+              </svg>
+            </ng-template>
+          </button>
+        </div>
+      </div>
+
+      <div class="text-xs mt-1" style="color: #432338; font-family: 'Poppins', sans-serif;">
+        {{ c.industry }} • {{ c.employees }} employees • {{ c.location }}
+      </div>
+
+      <div class="mt-2 flex justify-end">
+        <div
+          class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
+          style="background: #F77FBE;"
+        >
+          <svg
+            class="h-3 w-3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="13 6 19 12 13 18"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="!loading && !error && filteredCustomers().length === 0"
+    class="text-center py-12"
+  >
+    <div
+      class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"
+      style="background: #FFE1F7;"
+    >
+      <svg
+        class="w-8 h-8"
+        style="color: #F77FBE;"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+        />
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium mb-2" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 700;">
+      No customers found
+    </h3>
+    <p class="text-sm mb-4" style="color: #432338; font-family: 'Poppins', sans-serif;">
+      {{ query ? 'Try a different search' : 'Add your first customer to get started' }}
+    </p>
+    <button
+      (click)="openAddModal()"
+      class="text-white py-2.5 px-4 rounded-xl font-medium text-sm inline-flex items-center gap-2"
+      style="background: #F77FBE; font-family: 'Poppins', sans-serif; box-shadow: 0 2px 8px rgba(247, 127, 190, 0.3);"
+      onmouseover="this.style.background='#FF80BA'"
+      onmouseout="this.style.background='#F77FBE'"
+    >
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Add Customer
+    </button>
+  </div>
+
+  <div
+    *ngIf="showModal"
+    class="fixed inset-0 flex items-center justify-center z-50 p-4"
+    style="background: rgba(0, 0, 0, 0.5);"
+  >
+    <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto" style="box-shadow: 0 8px 24px rgba(247, 127, 190, 0.25); border: 1px solid #F77FBE;">
+      <div
+        class="sticky top-0 bg-white p-5 flex justify-between items-center rounded-t-xl"
+        style="border-bottom: 1px solid #FFE1F7;"
+      >
+        <h2 class="text-lg font-semibold" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 700;">
+          {{ isEditing ? 'Edit Customer' : 'Add New Customer' }}
+        </h2>
+
+        <button
+          class="transition disabled:opacity-50"
+          style="color: #432338;"
+          (click)="closeModal()"
+          [disabled]="modalLoading"
+          onmouseover="this.style.color='#F77FBE'"
+          onmouseout="this.style.color='#432338'"
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 600;">
+            Company Name
+          </label>
+          <input
+            [(ngModel)]="name"
+            placeholder="Enter company name"
+            required
+            [disabled]="modalLoading"
+            class="w-full p-2.5 rounded-xl focus:outline-none text-sm disabled:cursor-not-allowed"
+            style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338; background: white;"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 600;">
+            Industry
+          </label>
+          <input
+            [(ngModel)]="industry"
+            placeholder="Enter industry"
+            required
+            [disabled]="modalLoading"
+            class="w-full p-2.5 rounded-xl focus:outline-none text-sm disabled:cursor-not-allowed"
+            style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338; background: white;"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 600;">
+              Employees
+            </label>
+            <input
+              [(ngModel)]="employees"
+              type="number"
+              placeholder="Number of employees"
+              [disabled]="modalLoading"
+              class="w-full p-2.5 rounded-xl focus:outline-none text-sm disabled:cursor-not-allowed"
+              style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338; background: white;"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 600;">
+              Location
+            </label>
+            <input
+              [(ngModel)]="location"
+              placeholder="City, Country"
+              [disabled]="modalLoading"
+              class="w-full p-2.5 rounded-xl focus:outline-none text-sm disabled:cursor-not-allowed"
+              style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338; background: white;"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" style="color: #371A2D; font-family: 'Poppins', sans-serif; font-weight: 600;">
+            Overview
+          </label>
+          <textarea
+            [(ngModel)]="overview"
+            rows="3"
+            placeholder="Customer overview or description"
+            [disabled]="modalLoading"
+            class="w-full p-2.5 rounded-xl focus:outline-none text-sm disabled:cursor-not-allowed"
+            style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338; background: white;"
+          ></textarea>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <button
+            (click)="closeModal()"
+            [disabled]="modalLoading"
+            class="py-2.5 px-4 rounded-xl font-medium text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-2 sm:order-1"
+            style="background: #FFE1F7; color: #432338; font-family: 'Poppins', sans-serif; border: 1px solid #F77FBE;"
+            onmouseover="this.style.background='#FFB6B3'"
+            onmouseout="this.style.background='#FFE1F7'"
+          >
+            Cancel
+          </button>
+
+          <button
+            (click)="submit()"
+            [disabled]="modalLoading"
+            class="text-white py-2.5 px-4 rounded-xl font-medium text-sm transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed order-1 sm:order-2"
+            style="background: #F77FBE; font-family: 'Poppins', sans-serif; box-shadow: 0 2px 8px rgba(247, 127, 190, 0.3);"
+            onmouseover="this.style.background='#FF80BA'"
+            onmouseout="this.style.background='#F77FBE'"
+          >
+            <div class="flex items-center justify-center gap-2">
+              <svg
+                *ngIf="modalLoading"
+                class="h-4 w-4 animate-spin"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  d="M4 12a8 8 0 018-8"
+                  stroke-linecap="round"
+                ></path>
+              </svg>
+              <span>
+                {{
+                  isEditing
+                    ? (modalLoading ? 'Updating...' : 'Update Customer')
+                    : (modalLoading ? 'Saving...' : 'Save Customer')
+                }}
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- third -->
+
+<app-navbar></app-navbar>
+
+<div
+  class="h-[calc(100vh-55px)] px-4 md:px-5 py-3 md:py-3 flex justify-center overflow-hidden"
+  style="font-family: 'Poppins', sans-serif;"
+>
+  <div
+  class="w-full max-w-8xl rounded-3xl border border-[#F77FBE]
+         shadow-[0_0_0_4px_rgba(247,127,190,0.15)]
+         bg-white/90 backdrop-blur-sm
+         px-3 md:px-6 py-5 md:py-7
+         h-full flex flex-col overflow-hidden"
+>
+
+
+    <!-- <div class="mb-5 md:mb-7">
+      <p class="text-xs md:text-sm font-medium" style="color:#432338;">
+        Hello 👋
+      </p>
+      <h1
+        class="text-2xl md:text-3xl font-bold tracking-tight mb-2"
+        style="color:#371A2D;"
+      >
+        Customer Dashboard
+      </h1>
+      <p class="text-xs md:text-sm leading-relaxed max-w-xl" style="color:#432338;">
+        Here’s an overview of your customers. Search, add, edit or delete customers to keep your engagement workspace up to date.
+      </p>
+    </div> -->
+<div class="mb-5 md:mb-7 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+  
+  <!-- Left text -->
+  <div>
+    <p class="text-xs md:text-sm font-medium mb-1" style="color:#432338;">
+      Hello 👋
+    </p>
+    <h1
+      class="text-2xl md:text-3xl font-bold tracking-tight mb-2"
+      style="color:#371A2D;"
+    >
+      Customer Dashboard
+    </h1>
+    <p class="text-xs md:text-sm leading-relaxed max-w-xl" style="color:#432338;">
+      Here’s an overview of your customers. Search, add, edit or delete customers
+      to keep your engagement workspace up to date.
+    </p>
+  </div>
+
+  <!-- Right single stat -->
+  <div
+    class="rounded-xl border border-[#F77FBE] bg-[#FFE1F7]/60
+           px-5 py-3 flex flex-col items-start min-w-[140px]"
+  >
+    <span class="text-[11px] font-medium" style="color:#432338;">
+      Total customers
+    </span>
+    <span class="text-xl font-bold" style="color:#371A2D;">
+      {{ filteredCustomers().length }}
+    </span>
+  </div>
+
+</div>
+
+    <div
+      class="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 md:mb-7 items-stretch md:items-center"
+    >
+      <div
+        class="flex-1 flex items-stretch rounded-2xl border border-[#F77FBE] bg-[#FFE1F7]/40 shadow-[0_4px_12px_rgba(247,127,190,0.12)]"
+      >
+        <div class="relative flex-1">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2">
+            <svg
+              class="h-4 w-4"
+              style="color:#F77FBE;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input
+            [(ngModel)]="query"
+            type="text"
+            placeholder="Search customers by name, industry, or location..."
+            class="w-full h-full rounded-l-2xl border-0 bg-transparent pl-9 pr-3 py-2.5 text-xs md:text-sm focus:outline-none focus:ring-0"
+            style="color:#432338;"
+          />
+        </div>
+
+        <button
+          (click)="onSearch()"
+          class="px-4 md:px-5 text-xs md:text-sm font-semibold rounded-r-2xl transition
+                 bg-[#F77FBE] text-white shadow-[0_2px_8px_rgba(247,127,190,0.35)]
+                 hover:bg-[#FF80BA] active:scale-[0.98]"
+        >
+          Search
+        </button>
+      </div>
+
+      <button
+        (click)="openAddModal()"
+        class="inline-flex items-center justify-center gap-2 px-4 md:px-5 py-2.5
+               rounded-2xl text-xs md:text-sm font-semibold transition
+               bg-[#F77FBE] text-white shadow-[0_2px_10px_rgba(247,127,190,0.35)]
+               hover:bg-[#FF80BA] active:scale-[0.98]"
+      >
+        <svg
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        New customer
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-16 md:py-20">
+      <div
+        class="inline-block animate-spin rounded-full h-10 w-10 mb-4 border-4 border-[#FFE1F7] border-t-[#F77FBE]"
+      ></div>
+      <h3 class="text-base md:text-lg font-semibold mb-1" style="color:#371A2D;">
+        Loading customers
+      </h3>
+      <p class="text-xs md:text-sm" style="color:#432338;">
+        Please wait while we fetch your customer data…
+      </p>
+    </div>
+
+    <div
+      *ngIf="error && !loading"
+      class="rounded-2xl px-4 py-3 mb-5 flex items-start gap-2 border border-[#F77FBE] bg-[#FFE1F7]/60"
+    >
+      <svg
+        class="h-5 w-5 mt-0.5 shrink-0"
+        style="color:#F77FBE;"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <p class="text-xs md:text-sm" style="color:#432338;">{{ error }}</p>
+    </div>
+<div class="flex-1 overflow-y-auto pr-1">
+
+    <div
+      *ngIf="!loading"
+      class="grid gap-3 md:gap-4
+             grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+    >
+      <!-- <div
+        *ngFor="let c of filteredCustomers()"
+        (click)="openEditModal(c)"
+        class="group bg-white rounded-lg border border-[#F77FBE]
+               shadow-[0_4px_14px_rgba(247,127,190,0.18)]
+               px-3.5 py-3 flex flex-col justify-between cursor-pointer
+               transition-transform duration-200 hover:-translate-y-1.5
+               hover:shadow-[0_8px_20px_rgba(247,127,190,0.26)]"
+      >
+        <div class="flex items-start justify-between gap-2 mb-1.5">
+          <h3
+            class="text-sm font-semibold truncate pr-1.5"
+            style="color:#371A2D;"
+          >
+            {{ c.name }}
+          </h3>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+           <button
+  (click)="openEditModal(c); $event.stopPropagation()"
+  class="rounded-full p-1.5 transition hover:bg-[#FFE1F7]/70"
+  style="color:#9348D4;"
+  title="Edit customer"
+>
+  <svg
+    class="h-4 w-4"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 14.536A2 2 0 0111.12 15H9v-4z"
+    />
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M4 20h16"
+    />
+  </svg>
+</button>
+
+
+           <button
+  (click)="deleteCustomer(c.customer_id); $event.stopPropagation()"
+  class="rounded-full p-1.5 transition
+         hover:bg-red-50
+         disabled:opacity-60 disabled:cursor-not-allowed"
+  [disabled]="deletingId === c.customer_id"
+  style="color:#E53935;"
+  title="Delete customer"
+>
+  <ng-container *ngIf="deletingId === c.customer_id; else deleteIcon">
+    <svg
+      class="h-4 w-4 animate-spin"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+      ></circle>
+      <path
+        class="opacity-75"
+        d="M4 12a8 8 0 018-8"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+  </ng-container>
+
+  <ng-template #deleteIcon>
+    <svg
+      class="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M14 11v6" />
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 7l1 13a2 2 0 002 2h8a2 2 0 002-2l1-13" />
+    </svg>
+  </ng-template>
+</button>
+
+          </div>
+        </div>
+
+        <p class="text-[11px] leading-snug mb-2" style="color:#432338;">
+          {{ c.industry }} • {{ c.employees }} employees • {{ c.location }}
+        </p>
+
+        <div class="flex items-center justify-between pt-1">
+          <span
+            class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium
+                   bg-[#FFE1F7] text-[#432338]"
+          >
+            View details
+          </span>
+
+          <div
+            class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px]
+                   bg-[#F77FBE] group-hover:bg-[#FF80BA] transition"
+          >
+            <svg
+              class="h-3 w-3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="13 6 19 12 13 18"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div> -->
+   
+<div
+  *ngFor="let c of filteredCustomers()"
+  (click)="openEditModal(c)"
+  class="group bg-white rounded-lg border border-[#F77FBE]
+         px-3.5 py-3 flex flex-col justify-between cursor-pointer
+         transition-shadow duration-200
+         hover:shadow-[0_8px_24px_rgba(247,127,190,0.35)]
+         hover:border-[#FF80BA]"
+>
+  <div class="flex items-start justify-between gap-2 mb-1.5">
+    <h3
+      class="text-sm font-semibold truncate pr-1.5"
+      style="color:#371A2D;"
+    >
+      {{ c.name }}
+    </h3>
+
+    <div class="flex items-center gap-1.5 shrink-0">
+      <!-- EDIT -->
+      <button
+        (click)="openEditModal(c); $event.stopPropagation()"
+        class="rounded-full p-1.5 transition hover:bg-[#FFE1F7]/70"
+        style="color:#9348D4;"
+        title="Edit customer"
+      >
+        <svg
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 14.536A2 2 0 0111.12 15H9v-4z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4 20h16"
+          />
+        </svg>
+      </button>
+
+      <!-- DELETE -->
+      <button
+        (click)="deleteCustomer(c.customer_id); $event.stopPropagation()"
+        class="rounded-full p-1.5 transition
+               hover:bg-red-50
+               disabled:opacity-60 disabled:cursor-not-allowed"
+        [disabled]="deletingId === c.customer_id"
+        style="color:#E53935;"
+        title="Delete customer"
+      >
+        <ng-container *ngIf="deletingId === c.customer_id; else deleteIcon">
+          <svg
+            class="h-4 w-4 animate-spin"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+            ></circle>
+            <path
+              class="opacity-75"
+              d="M4 12a8 8 0 018-8"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+        </ng-container>
+
+        <ng-template #deleteIcon>
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 11v6" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 7l1 13a2 2 0 002 2h8a2 2 0 002-2l1-13" />
+          </svg>
+        </ng-template>
+      </button>
+    </div>
+  </div>
+
+  <p class="text-[11px] leading-snug mb-2" style="color:#432338;">
+    {{ c.industry }} • {{ c.employees }} employees • {{ c.location }}
+  </p>
+
+  <div class="flex items-center justify-between pt-1">
+    <span
+      class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium
+             bg-[#FFE1F7] text-[#432338]"
+    >
+      View details
+    </span>
+
+    <div
+      class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px]
+             bg-[#F77FBE] group-hover:bg-[#FF80BA] transition"
+    >
+      <svg
+        class="h-3 w-3"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="13 6 19 12 13 18"></polyline>
+      </svg>
+    </div>
+  </div>
+</div>
+
+
+    </div>
+</div>
+    <div
+      *ngIf="!loading && !error && filteredCustomers().length === 0"
+      class="text-center py-14"
+    >
+      <div
+        class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4
+               bg-[#FFE1F7]"
+      >
+        <svg
+          class="w-8 h-8"
+          style="color:#F77FBE;"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          />
+        </svg>
+      </div>
+      <h3
+        class="text-base md:text-lg font-semibold mb-1"
+        style="color:#371A2D;"
+      >
+        No customers found
+      </h3>
+      <p class="text-xs md:text-sm mb-4" style="color:#432338;">
+        {{
+          query
+            ? 'Try a different search or clear your filters.'
+            : 'Add your first customer to start tracking engagement.'
+        }}
+      </p>
+      <button
+        (click)="openAddModal()"
+        class="inline-flex items-center justify-center gap-2 px-4 md:px-5 py-2.5
+               rounded-2xl text-xs md:text-sm font-semibold transition
+               bg-[#F77FBE] text-white shadow-[0_2px_10px_rgba(247,127,190,0.35)]
+               hover:bg-[#FF80BA] active:scale-[0.98]"
+      >
+        <svg
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add customer
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="showModal"
+    class="fixed inset-0 z-50 flex items-center justify-center px-4"
+    style="background: rgba(0,0,0,0.45);"
+  >
+    <div
+      class="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white
+             border border-[#F77FBE]
+             shadow-[0_12px_32px_rgba(55,26,45,0.25)]"
+    >
+      <div
+        class="sticky top-0 flex items-center justify-between px-5 py-4 rounded-t-2xl
+               border-b border-[#FFE1F7] bg-white/95 backdrop-blur"
+      >
+        <h2
+          class="text-base md:text-lg font-semibold"
+          style="color:#371A2D;"
+        >
+          {{ isEditing ? 'Edit customer' : 'Add new customer' }}
+        </h2>
+        <button
+          (click)="closeModal()"
+          [disabled]="modalLoading"
+          class="rounded-full p-1.5 transition disabled:opacity-50
+                 hover:bg-[#FFE1F7]/70"
+          style="color:#432338;"
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-5 py-5 space-y-4">
+        <div>
+          <label
+            class="block text-xs font-semibold mb-1.5"
+            style="color:#371A2D;"
+          >
+            Company name
+          </label>
+          <input
+            [(ngModel)]="name"
+            placeholder="Enter company name"
+            required
+            [disabled]="modalLoading"
+            class="w-full rounded-lg border border-[#F77FBE] px-3 py-2.5
+                   text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#F77FBE]/60
+                   disabled:cursor-not-allowed"
+            style="color:#432338; background:white;"
+          />
+        </div>
+
+        <div>
+          <label
+            class="block text-xs font-semibold mb-1.5"
+            style="color:#371A2D;"
+          >
+            Industry
+          </label>
+          <input
+            [(ngModel)]="industry"
+            placeholder="Enter industry"
+            required
+            [disabled]="modalLoading"
+            class="w-full rounded-lg border border-[#F77FBE] px-3 py-2.5
+                   text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#F77FBE]/60
+                   disabled:cursor-not-allowed"
+            style="color:#432338; background:white;"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label
+              class="block text-xs font-semibold mb-1.5"
+              style="color:#371A2D;"
+            >
+              Employees
+            </label>
+            <input
+              [(ngModel)]="employees"
+              type="number"
+              placeholder="Number of employees"
+              [disabled]="modalLoading"
+              class="w-full rounded-lg border border-[#F77FBE] px-3 py-2.5
+                     text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#F77FBE]/60
+                     disabled:cursor-not-allowed"
+              style="color:#432338; background:white;"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-semibold mb-1.5"
+              style="color:#371A2D;"
+            >
+              Location
+            </label>
+            <input
+              [(ngModel)]="location"
+              placeholder="City, country"
+              [disabled]="modalLoading"
+              class="w-full rounded-lg border border-[#F77FBE] px-3 py-2.5
+                     text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#F77FBE]/60
+                     disabled:cursor-not-allowed"
+              style="color:#432338; background:white;"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            class="block text-xs font-semibold mb-1.5"
+            style="color:#371A2D;"
+          >
+            Overview
+          </label>
+          <textarea
+            [(ngModel)]="overview"
+            rows="3"
+            placeholder="Customer overview or description"
+            [disabled]="modalLoading"
+            class="w-full rounded-2xl border border-[#F77FBE] px-3 py-2.5
+                   text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-[#F77FBE]/60
+                   disabled:cursor-not-allowed"
+            style="color:#432338; background:white; resize: vertical;"
+          ></textarea>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+          <button
+            (click)="closeModal()"
+            [disabled]="modalLoading"
+            class="order-2 sm:order-1 px-4 py-2.5 rounded-2xl text-xs md:text-sm
+                   font-semibold border border-[#F77FBE]
+                   bg-[#FFE1F7] text-[#432338]
+                   hover:bg-[#FFB6B3] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+
+          <button
+            (click)="submit()"
+            [disabled]="modalLoading"
+            class="order-1 sm:order-2 px-4 py-2.5 rounded-2xl text-xs md:text-sm
+                   font-semibold text-white
+                   bg-[#F77FBE] hover:bg-[#FF80BA]
+                   shadow-[0_2px_10px_rgba(247,127,190,0.35)]
+                   active:scale-[0.98]
+                   flex items-center justify-center gap-2
+                   disabled:opacity-60 disabled:cursor-not-allowed transition"
+          >
+            <svg
+              *ngIf="modalLoading"
+              class="h-4 w-4 animate-spin"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+              ></circle>
+              <path
+                class="opacity-75"
+                d="M4 12a8 8 0 018-8"
+                stroke-linecap="round"
+              ></path>
+            </svg>
+            <span>
+              {{
+                isEditing
+                  ? (modalLoading ? 'Updating…' : 'Update customer')
+                  : (modalLoading ? 'Saving…' : 'Save customer')
+              }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

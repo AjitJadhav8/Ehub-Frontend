@@ -1,0 +1,148 @@
+<!-- <div class="h-screen flex items-center justify-center p-4"
+     style="font-family: 'Poppins', sans-serif;">
+
+  <div class="bg-white rounded-2xl shadow-[0_10px_30px_rgba(247,127,190,0.35)] 
+              p-8 w-full max-w-sm border border-[#F77FBE]">
+
+    <div class="flex items-center justify-center gap-2 mb-5">
+      <div class="w-9 h-9 bg-[#F77FBE] rounded-lg flex items-center justify-center text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M18 10c0 3.866-3.582 7-8 7a9.77 9.77 0 01-2.12-.237L3 18l1.212-3.637A6.57 6.57 0 012 10c0-3.866 3.582-7 8-7s8 3.134 8 7z"/>
+        </svg>
+      </div>
+      <span class="text-[#371A2D] text-xl font-bold">Engagement Hub</span>
+    </div>
+
+    <h2 class="text-[#371A2D] text-base font-semibold text-center mb-1">
+      Welcome Back
+    </h2>
+
+    <p class="text-[#432338] text-sm text-center mb-6 opacity-80">
+      Sign in to access your AI engagement tool
+    </p>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-4">
+
+      <div class="relative">
+        <input type="text"
+          [(ngModel)]="username"
+          name="username"
+          required
+          placeholder="Username or Email"
+          class="w-full p-2.5 pl-10 border border-[#F77FBE] rounded-lg 
+                 focus:outline-none focus:ring-2 focus:ring-[#F77FBE] text-sm">
+
+        <svg class="absolute left-3 top-3 h-4 w-4 text-[#9348D4]" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M5.121 17.804A9 9 0 1118.88 17.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </div>
+
+      <div class="relative">
+        <input type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+          placeholder="Password"
+          class="w-full p-2.5 pl-10 border border-[#F77FBE] rounded-lg 
+                 focus:outline-none focus:ring-2 focus:ring-[#F77FBE] text-sm">
+
+        <svg class="absolute left-3 top-3 h-4 w-4 text-[#9348D4]" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 11c-1.657 0-3 1.343-3 3v4h6v-4c0-1.657-1.343-3-3-3zm0-6a4 4 0 00-4 4v2h8V9a4 4 0 00-4-4z"/>
+        </svg>
+      </div>
+
+      <button type="submit"
+        class="w-full bg-[#F77FBE] text-white py-2.5 rounded-lg font-medium 
+               hover:bg-[#FF80BA] transition duration-200 shadow-md">
+        Sign In
+      </button>
+
+    </form>
+
+    <div class="mt-4 text-center text-sm">
+      <a class="text-[#9348D4] hover:underline cursor-pointer"
+         (click)="forgotPassword()">
+        Forgot your password?
+      </a>
+    </div>
+
+  </div>
+</div> -->
+<div class="h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #FFE1F7 0%, #FFB6B3 50%, #FF80BA 100%); font-family: 'Poppins', sans-serif;">
+  <div class="bg-white backdrop-blur-md rounded-2xl p-8 w-full max-w-sm" style="box-shadow: 0 8px 24px rgba(247, 127, 190, 0.3); border: 1px solid #F77FBE;">
+    <!-- Logo + Heading -->
+    <div class="text-2xl font-bold text-center mb-4 tracking-tight flex items-center justify-center gap-2" style="color: #371A2D; font-weight: 700;">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white" style="background: #F77FBE;">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+          <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+        </svg>
+      </div>
+      Engagement Hub
+    </div>
+    
+    <h2 class="text-base text-center mb-1 font-semibold" style="color: #371A2D; font-weight: 700;">Welcome Back</h2>
+    <p class="text-center mb-6 text-sm" style="color: #432338; font-weight: 400;">Sign in to access your AI engagement tool</p>
+
+    <!-- Login Form -->
+    <form (ngSubmit)="onSubmit()" class="space-y-3">
+      <!-- Username -->
+      <div class="relative">
+        <input 
+          type="text" 
+          [(ngModel)]="username" 
+          name="username" 
+          required 
+          placeholder="Username or Email" 
+          class="w-full p-2.5 pl-10 rounded-lg focus:outline-none text-sm"
+          style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338;"
+        />
+        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-3 h-4 w-4" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+      </div>
+
+      <!-- Password -->
+      <div class="relative">
+        <input 
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          required 
+          placeholder="Password" 
+          class="w-full p-2.5 pl-10 rounded-lg focus:outline-none text-sm"
+          style="border: 1px solid #F77FBE; font-family: 'Poppins', sans-serif; color: #432338;"
+        />
+        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-3 h-4 w-4" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="w-full text-white py-2 rounded-lg font-medium transition duration-200 text-sm"
+        style="background: #F77FBE; font-family: 'Poppins', sans-serif; font-weight: 600; box-shadow: 0 2px 8px rgba(247, 127, 190, 0.3);"
+        onmouseover="this.style.background='#FF80BA'"
+        onmouseout="this.style.background='#F77FBE'"
+      >
+        Sign In
+      </button>
+    </form>
+
+    <div class="mt-4 text-center text-sm">
+      <a 
+        class="cursor-pointer transition"
+        style="color: #9348D4; font-family: 'Poppins', sans-serif; font-weight: 500;"
+        onmouseover="this.style.textDecoration='underline'; this.style.color='#8B80DA'"
+        onmouseout="this.style.textDecoration='none'; this.style.color='#9348D4'"
+        (click)="forgotPassword()">
+        Forgot your password?
+      </a>
+    </div>
+  </div>
+</div>

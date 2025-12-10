@@ -1,14 +1,43 @@
-<!-- simple navbar template (src/app/shared/components/navbar/navbar.component.html) -->
-<nav class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-4 flex justify-between items-center">
-  <div class="flex items-center gap-3">
-    <div class="w-8 h-8 bg-white/20 rounded flex items-center justify-center text-white">
-      <i class="fas fa-comments"></i>
+<!-- <nav class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-b border-blue-500 py-2.5 px-5 flex justify-between items-center shadow-lg">
+  <div class="text-white text-base font-semibold tracking-tight flex items-center gap-2">
+    <div class="w-6 h-6 bg-white/20 rounded flex items-center justify-center">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
     </div>
-    <div class="font-semibold">Engagement Hub</div>
+    Engagement Hub
   </div>
-
+  
   <div class="flex items-center gap-3">
-    <div class="text-sm font-medium">John Doe</div>
-    <button class="text-sm px-3 py-1 bg-white/10 rounded" (click)="logout()">Logout</button>
+    <div class="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-medium">JD</div>
+    <div class="text-sm font-medium hidden sm:block">John Doe</div>
+    <button class="text-xs sm:text-sm px-3 py-1.5 bg-white/10 rounded hover:bg-white/20 transition" (click)="logout()">
+      <span class="hidden sm:inline">Logout</span>
+      <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+    </button>
+  </div>
+</nav> -->
+<nav class="text-white border-b py-2.5 px-5 flex justify-between items-center" style="background: #FFFFFF; border-color: #F77FBE; box-shadow: 0 4px 12px rgba(247, 127, 190, 0.15); font-family: 'Poppins', sans-serif;">
+  <div class="text-base font-semibold tracking-tight flex items-center gap-2" style="font-weight: 700; color: #371A2D;">
+    <img src="spaceof_logo.png" alt="Logo" class="h-8 w-auto" />
+    <span>Engagement Hub</span>
+  </div>
+  
+  <div class="flex items-center gap-3">
+    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium" style="background: #FFE1F7; color: #371A2D; font-weight: 600;">JD</div>
+    <div class="text-sm font-medium hidden sm:block" style="font-weight: 600; color: #432338;">John Doe</div>
+    <button 
+      class="text-xs sm:text-sm px-3 py-1.5 rounded-lg transition" 
+      style="background: #F77FBE; color: #FFFFFF; font-family: 'Poppins', sans-serif; font-weight: 500; box-shadow: 0 2px 6px rgba(247, 127, 190, 0.25);"
+      onmouseover="this.style.background='#FF80BA'"
+      onmouseout="this.style.background='#F77FBE'"
+      (click)="logout()">
+      <span class="hidden sm:inline">Logout</span>
+      <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+    </button>
   </div>
 </nav>
