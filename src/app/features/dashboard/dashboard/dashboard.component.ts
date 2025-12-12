@@ -1,9 +1,11 @@
 import { CommonModule, formatDate } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from "../../../shared/components/navbar/navbar.component";
 import Swal from 'sweetalert2';
+import * as echarts from 'echarts';
 
 
 @Component({
@@ -24,6 +26,10 @@ export class DashboardComponent implements OnInit {
   editingCustomerId: any = null;
   modalLoading = false;
 
+  // view modal state
+  showViewModal = false;
+  viewingCustomer: any = null;
+
   // form fields
   name = '';
   industry = '';
@@ -37,7 +43,7 @@ export class DashboardComponent implements OnInit {
   // row-level delete state
   deletingId: string | null = null;
 
-  constructor(private ds: DashboardService) {}
+  constructor(private ds: DashboardService, private router: Router) {}
 
   ngOnInit(): void {
     // only first time show big loader
@@ -163,6 +169,16 @@ export class DashboardComponent implements OnInit {
       this.showModal = false;
       this.resetForm();
     }
+  }
+
+  closeViewModal(): void {
+    this.showViewModal = false;
+    this.viewingCustomer = null;
+  }
+
+  openViewModal(c: any): void {
+    this.viewingCustomer = c;
+    this.showViewModal = true;
   }
 
   resetForm(): void {
@@ -292,6 +308,12 @@ deleteCustomer(id: string): void {
     }
   });
 }
+
+  // ---------- Navigation ----------
+
+  goToSurveyDashboard(customerId: string): void {
+    this.router.navigate(['/survey-dashboard'], { queryParams: { customerId } });
+  }
 
   // ---------- Search ----------
 

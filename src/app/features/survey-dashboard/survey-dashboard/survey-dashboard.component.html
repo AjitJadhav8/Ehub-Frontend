@@ -1,0 +1,165 @@
+<app-navbar></app-navbar>
+
+<div class="survey-dashboard min-h-screen bg-white p-2 md:p-4">
+  <div class="flex flex-col lg:flex-row h-full gap-2 md:gap-4 max-w-15xl mx-auto">
+    
+    <!-- Left Sidebar - Survey List -->
+    <div class="w-full lg:w-64 lg:flex-shrink-0 bg-white rounded-2xl shadow-lg border border-[#F77FBE]/30 p-3 md:p-4">
+      <!-- Customer Name -->
+      <div class="mb-6 pb-4 border-b border-[#FFE1F7]">
+        <h2 class="text-lg font-bold" style="color: #371A2D;">Customer Name</h2>
+      </div>
+
+      <!-- Survey List -->
+      <div>
+        <h3 class="text-sm font-semibold mb-3 uppercase tracking-wider" style="color: #371A2D;">Survey List</h3>
+        <div class="space-y-2">
+          <!-- Active Survey -->
+          <div class="p-3 rounded-xl bg-[#FFE1F7] border border-[#F77FBE] cursor-pointer transition-all hover:scale-[1.02]">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-medium text-sm" style="color: #371A2D;">Q4 2024 Team Survey</span>
+            </div>
+            <div class="text-xs" style="color: #432338;">72 responses • Updated 2 days ago</div>
+          </div>
+
+          <!-- Previous Surveys -->
+          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
+            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q3 2024 Team Survey</div>
+            <div class="text-xs" style="color: #432338;">68 responses • Sep 2024</div>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
+            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q2 2024 Team Survey</div>
+            <div class="text-xs" style="color: #432338;">65 responses • Jun 2024</div>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
+            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q1 2024 Team Survey</div>
+            <div class="text-xs" style="color: #432338;">63 responses • Mar 2024</div>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
+            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q4 2023 Team Survey</div>
+            <div class="text-xs" style="color: #432338;">60 responses • Dec 2023</div>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
+            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q3 2023 Team Survey</div>
+            <div class="text-xs" style="color: #432338;">58 responses • Sep 2023</div>
+          </div>
+
+   
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area - All Charts -->
+    <div class="flex-1 flex flex-col gap-2 md:gap-4">
+      
+      <!-- Charts Grid -->
+      <div class="flex-1 flex flex-col gap-3 min-h-0">
+        
+        <!-- Top Row: Scatter and Bar Charts - Equal Size -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-3 min-h-0" style="height: 340px;">
+          <!-- Scatter Plot -->
+          <div class="bg-white rounded-2xl shadow-lg p-2 md:p-3 border border-[#F77FBE]/30 min-h-0">
+            <app-scatter-chart (pointClick)="onPointClick($event)"></app-scatter-chart>
+          </div>
+
+          <!-- Bar Chart -->
+          <div class="bg-white rounded-2xl shadow-lg p-2 md:p-3 border border-[#F77FBE]/30 min-h-0">
+            <app-bar-chart [data]="barChartData" [title]="''"></app-bar-chart>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Donut Charts - 2 Large Boxes (5 + 4) -->
+        <div class="flex-1 flex flex-col gap-0 min-h-0 overflow-hidden">
+          
+          <!-- First Box: 5 Donuts -->
+          <div class="bg-white rounded-2xl shadow-lg p-3 border border-[#F77FBE]/30 mb-2">
+            <div class="grid grid-cols-5 gap-2 h-32">
+              <!-- Donut 1: Accountability -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[0]" [index]="0"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[0].name }}</p>
+              </div>
+
+              <!-- Donut 2: Autonomy -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[1]" [index]="1"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[1].name }}</p>
+              </div>
+
+              <!-- Donut 3: Collaboration -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[2]" [index]="2"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[2].name }}</p>
+              </div>
+
+              <!-- Donut 4: Courage -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[3]" [index]="3"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[3].name }}</p>
+              </div>
+
+              <!-- Donut 5: Inclusion -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[4]" [index]="4"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[4].name }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Second Box: 4 Donuts -->
+          <div class="bg-white rounded-2xl shadow-lg p-3 border border-[#F77FBE]/30">
+            <div class="grid grid-cols-4 gap-2 h-32">
+              <!-- Donut 6: Mastery -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[5]" [index]="5"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[5].name }}</p>
+              </div>
+
+              <!-- Donut 7: Purpose -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[6]" [index]="6"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[6].name }}</p>
+              </div>
+
+              <!-- Donut 8: Relatedness -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[7]" [index]="7"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[7].name }}</p>
+              </div>
+
+              <!-- Donut 9: Vulnerability -->
+              <div class="flex flex-col items-center justify-center">
+                <div style="height: 90px; width: 90px;">
+                  <app-donut-chart [dimensionData]="barChartData[8]" [index]="8"></app-donut-chart>
+                </div>
+                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[8].name }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

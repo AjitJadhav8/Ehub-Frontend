@@ -1,0 +1,58 @@
+.survey-dashboard {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFE1F7;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #F77FBE;
+  border-radius: 4px;
+}
+
+/* Smooth transitions */
+.bg-white {
+  transition: box-shadow 0.3s ease;
+}
+
+.bg-white:hover {
+  box-shadow: 0 8px 25px rgba(247, 127, 190, 0.15);
+}
+
+/* Remove margin from charts */
+app-scatter-chart,
+app-bar-chart,
+app-donut-chart {
+  height: 100%;
+  width: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .w-56 {
+    width: 14rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .survey-dashboard {
+    flex-direction: column;
+  }
+  
+  .w-56 {
+    width: 100%;
+    max-height: 120px;
+    border-right: none;
+    border-bottom: 1px solid #F77FBE;
+  }
+}
