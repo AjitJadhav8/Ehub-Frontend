@@ -6,9 +6,32 @@
     <!-- Left Sidebar - Survey List -->
     <div class="w-full lg:w-64 lg:flex-shrink-0 bg-white rounded-2xl shadow-lg border border-[#F77FBE]/30 p-3 md:p-4">
       <!-- Customer Name -->
-      <div class="mb-6 pb-4 border-b border-[#FFE1F7]">
+      <div class="mb-6 pb-4 border-b border-[#FFE1F7] flex justify-between items-center">
         <h2 class="text-lg font-bold" style="color: #371A2D;">Customer Name</h2>
+        <div class="flex gap-1">
+          <!-- Send to Backend Button -->
+          <button 
+            (click)="sendToBackend()"
+            class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors"
+            title="Send Charts to Backend"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+          <!-- Export All Button -->
+          <button 
+            (click)="exportAllCharts()"
+            class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors"
+            title="Export All Charts"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
+        </div>
       </div>
+
 
       <!-- Survey List -->
       <div>
@@ -47,8 +70,6 @@
             <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q3 2023 Team Survey</div>
             <div class="text-xs" style="color: #432338;">58 responses • Sep 2023</div>
           </div>
-
-   
         </div>
       </div>
     </div>
