@@ -1,15 +1,12 @@
-<app-navbar></app-navbar>
+<!-- <app-navbar></app-navbar>
 
 <div class="survey-dashboard min-h-screen bg-white p-2 md:p-4">
   <div class="flex flex-col lg:flex-row h-full gap-2 md:gap-4 max-w-15xl mx-auto">
     
-    <!-- Left Sidebar - Survey List -->
     <div class="w-full lg:w-64 lg:flex-shrink-0 bg-white rounded-2xl shadow-lg border border-[#F77FBE]/30 p-3 md:p-4">
-      <!-- Customer Name -->
       <div class="mb-6 pb-4 border-b border-[#FFE1F7] flex justify-between items-center">
         <h2 class="text-lg font-bold" style="color: #371A2D;">Customer Name</h2>
         <div class="flex gap-1">
-          <!-- Send to Backend Button -->
           <button 
             (click)="sendToBackend()"
             class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors"
@@ -19,7 +16,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>
-          <!-- Export All Button -->
           <button 
             (click)="exportAllCharts()"
             class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors"
@@ -32,155 +28,664 @@
         </div>
       </div>
 
-
-      <!-- Survey List -->
       <div>
         <h3 class="text-sm font-semibold mb-3 uppercase tracking-wider" style="color: #371A2D;">Survey List</h3>
         <div class="space-y-2">
-          <!-- Active Survey -->
-          <div class="p-3 rounded-xl bg-[#FFE1F7] border border-[#F77FBE] cursor-pointer transition-all hover:scale-[1.02]">
+          <div class="p-3 rounded-xl bg-[#FFE1F7] border border-[#F77FBE] cursor-pointer"
+               (click)="selectSurvey(surveys[0])">
             <div class="flex items-center justify-between mb-1">
               <span class="font-medium text-sm" style="color: #371A2D;">Q4 2024 Team Survey</span>
             </div>
             <div class="text-xs" style="color: #432338;">72 responses • Updated 2 days ago</div>
           </div>
 
-          <!-- Previous Surveys -->
-          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
-            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q3 2024 Team Survey</div>
-            <div class="text-xs" style="color: #432338;">68 responses • Sep 2024</div>
-          </div>
-
-          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
-            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q2 2024 Team Survey</div>
-            <div class="text-xs" style="color: #432338;">65 responses • Jun 2024</div>
-          </div>
-
-          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
-            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q1 2024 Team Survey</div>
-            <div class="text-xs" style="color: #432338;">63 responses • Mar 2024</div>
-          </div>
-
-          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
-            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q4 2023 Team Survey</div>
-            <div class="text-xs" style="color: #432338;">60 responses • Dec 2023</div>
-          </div>
-
-          <div class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer transition-all hover:scale-[1.02] hover:border-[#F77FBE]">
-            <div class="font-medium text-sm mb-1" style="color: #371A2D;">Q3 2023 Team Survey</div>
-            <div class="text-xs" style="color: #432338;">58 responses • Sep 2023</div>
+          <div *ngFor="let survey of surveys.slice(1)" 
+               class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer"
+               (click)="selectSurvey(survey)">
+            <div class="font-medium text-sm mb-1" style="color: #371A2D;">{{survey.name}}</div>
+            <div class="text-xs" style="color: #432338;">{{survey.responses}} responses • {{survey.date}}</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Content Area - All Charts -->
-    <div class="flex-1 flex flex-col gap-2 md:gap-4">
-      
-      <!-- Charts Grid -->
-      <div class="flex-1 flex flex-col gap-3 min-h-0">
+    <div class="flex-1 flex flex-col gap-4 md:gap-6 overflow-y-auto max-h-[calc(100vh-2rem)] pr-2">
+
+      <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-base font-semibold" style="color:#371A2D;">Team Performance Matrix</h3>
+            <p class="text-xs" style="color:#432338;">Motivation vs Psychological Safety across teams</p>
+          </div>
+          <button (click)="toggleEdit('scatter')" class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors" title="Edit Description">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+        </div>
         
-        <!-- Top Row: Scatter and Bar Charts - Equal Size -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-3 min-h-0" style="height: 340px;">
-          <!-- Scatter Plot -->
-          <div class="bg-white rounded-2xl shadow-lg p-2 md:p-3 border border-[#F77FBE]/30 min-h-0">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="h-72 lg:h-80">
             <app-scatter-chart (pointClick)="onPointClick($event)"></app-scatter-chart>
           </div>
-
-          <!-- Bar Chart -->
-          <div class="bg-white rounded-2xl shadow-lg p-2 md:p-3 border border-[#F77FBE]/30 min-h-0">
-            <app-bar-chart [data]="barChartData" [title]="''"></app-bar-chart>
-          </div>
-        </div>
-
-        <!-- Bottom Row: Donut Charts - 2 Large Boxes (5 + 4) -->
-        <div class="flex-1 flex flex-col gap-0 min-h-0 overflow-hidden">
           
-          <!-- First Box: 5 Donuts -->
-          <div class="bg-white rounded-2xl shadow-lg p-3 border border-[#F77FBE]/30 mb-2">
-            <div class="grid grid-cols-5 gap-2 h-32">
-              <!-- Donut 1: Accountability -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[0]" [index]="0"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[0].name }}</p>
-              </div>
-
-              <!-- Donut 2: Autonomy -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[1]" [index]="1"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[1].name }}</p>
-              </div>
-
-              <!-- Donut 3: Collaboration -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[2]" [index]="2"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[2].name }}</p>
-              </div>
-
-              <!-- Donut 4: Courage -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[3]" [index]="3"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[3].name }}</p>
-              </div>
-
-              <!-- Donut 5: Inclusion -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[4]" [index]="4"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[4].name }}</p>
-              </div>
+          <div class="relative">
+            <div *ngIf="!isEditing['scatter']" class="text-sm leading-relaxed" style="color:#432338;">
+              {{descriptions.scatter}}
             </div>
-          </div>
-
-          <!-- Second Box: 4 Donuts -->
-          <div class="bg-white rounded-2xl shadow-lg p-3 border border-[#F77FBE]/30">
-            <div class="grid grid-cols-4 gap-2 h-32">
-              <!-- Donut 6: Mastery -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[5]" [index]="5"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[5].name }}</p>
-              </div>
-
-              <!-- Donut 7: Purpose -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[6]" [index]="6"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[6].name }}</p>
-              </div>
-
-              <!-- Donut 8: Relatedness -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[7]" [index]="7"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[7].name }}</p>
-              </div>
-
-              <!-- Donut 9: Vulnerability -->
-              <div class="flex flex-col items-center justify-center">
-                <div style="height: 90px; width: 90px;">
-                  <app-donut-chart [dimensionData]="barChartData[8]" [index]="8"></app-donut-chart>
-                </div>
-                <p class="text-xs font-semibold mt-1 text-center" style="color: #371A2D;">{{ barChartData[8].name }}</p>
+            
+            <div *ngIf="isEditing['scatter']" class="space-y-4">
+              <textarea [(ngModel)]="descriptions.scatter" 
+                       rows="12"
+                       class="w-full p-4 text-sm border border-[#F77FBE] rounded-xl focus:ring-2 focus:ring-[#F77FBE] focus:border-transparent"
+                       style="color:#432338; background: white;"></textarea>
+              <div class="flex gap-3">
+                <button (click)="saveDescription('scatter')" 
+                        class="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl bg-[#F77FBE] text-white">
+                  Save Changes
+                </button>
+                <button (click)="cancelEdit('scatter')" 
+                        class="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-300 text-gray-600">
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
         </div>
-
       </div>
 
+      <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-base font-semibold" style="color:#371A2D;">Dimension Scores</h3>
+            <p class="text-xs" style="color:#432338;">Average score across core engagement dimensions</p>
+          </div>
+          <button (click)="toggleEdit('bar')" class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors" title="Edit Description">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="h-72 lg:h-80">
+            <app-bar-chart [data]="barChartData" [title]="''"></app-bar-chart>
+          </div>
+          
+          <div class="relative">
+            <div *ngIf="!isEditing['bar']" class="text-sm leading-relaxed" style="color:#432338;">
+              {{descriptions.bar}}
+            </div>
+            
+            <div *ngIf="isEditing['bar']" class="space-y-4">
+              <textarea [(ngModel)]="descriptions.bar" 
+                       rows="12"
+                       class="w-full p-4 text-sm border border-[#F77FBE] rounded-xl focus:ring-2 focus:ring-[#F77FBE] focus:border-transparent"
+                       style="color:#432338; background: white;"></textarea>
+              <div class="flex gap-3">
+                <button (click)="saveDescription('bar')" 
+                        class="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl bg-[#F77FBE] text-white">
+                  Save Changes
+                </button>
+                <button (click)="cancelEdit('bar')" 
+                        class="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-300 text-gray-600">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <h3 class="text-base font-semibold" style="color:#371A2D;">Core Engagement Drivers</h3>
+              <p class="text-xs" style="color:#432338;">Foundational behaviors influencing daily engagement</p>
+            </div>
+            <div class="flex gap-2">
+              <button *ngIf="!isEditingDonuts[0]" (click)="toggleDonutEdit(0)" 
+                      class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors" title="Edit Descriptions">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <div *ngIf="isEditingDonuts[0]" class="flex gap-2">
+                <button (click)="saveAllDonutDescriptions(0)" 
+                        class="px-3 py-2 text-xs font-medium rounded-lg bg-[#F77FBE] text-white">
+                  Save All
+                </button>
+                <button (click)="cancelDonutEdit(0)" 
+                        class="px-3 py-2 text-xs font-medium rounded-lg border border-gray-300 text-gray-600">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <div *ngFor="let item of barChartData.slice(0,5); let i = index" 
+                 class="grid grid-cols-4 gap-4 items-start p-3">
+              <div class="col-span-1 flex justify-center">
+                <div class="relative">
+                  <div class="donut-md">
+                    <app-donut-chart [dimensionData]="item" [index]="i"></app-donut-chart>
+                  </div>
+                  <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 py-0.5 rounded-full border border-[#F77FBE]/30">
+                    <span class="text-xs font-bold" style="color: #371A2D;">{{ item.value }}%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-span-3">
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="text-sm font-semibold" style="color:#371A2D;">{{ item.name }}</h4>
+                  <span class="text-xs px-2 py-0.5 rounded-full" 
+                        [ngClass]="{
+                          'bg-green-100 text-green-800': item.value >= 70,
+                          'bg-yellow-100 text-yellow-800': item.value >= 50 && item.value < 70,
+                          'bg-red-100 text-red-800': item.value < 50
+                        }">
+                    {{ getScoreLabel(item.value) }}
+                  </span>
+                </div>
+                
+                <div *ngIf="!isEditingDonuts[0]">
+                  <p class="text-xs leading-relaxed" style="color:#432338;">
+                    {{ getDonutDescription(i) }}
+                  </p>
+                </div>
+                
+                <div *ngIf="isEditingDonuts[0]" class="space-y-2">
+                  <textarea [(ngModel)]="tempDonutDescriptions[i]" 
+                            rows="3"
+                            class="w-full p-2 text-xs border border-[#F77FBE] rounded-lg focus:ring-1 focus:ring-[#F77FBE] focus:border-transparent"
+                            style="color:#432338; background: white;"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <h3 class="text-base font-semibold" style="color:#371A2D;">Growth & Trust Indicators</h3>
+              <p class="text-xs" style="color:#432338;">Signals of learning, purpose, and team safety</p>
+            </div>
+            <div class="flex gap-2">
+              <button *ngIf="!isEditingDonuts[1]" (click)="toggleDonutEdit(1)" 
+                      class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors" title="Edit Descriptions">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: #F77FBE;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <div *ngIf="isEditingDonuts[1]" class="flex gap-2">
+                <button (click)="saveAllDonutDescriptions(1)" 
+                        class="px-3 py-2 text-xs font-medium rounded-lg bg-[#F77FBE] text-white">
+                  Save All
+                </button>
+                <button (click)="cancelDonutEdit(1)" 
+                        class="px-3 py-2 text-xs font-medium rounded-lg border border-gray-300 text-gray-600">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <div *ngFor="let item of barChartData.slice(5); let i = index" 
+                 class="grid grid-cols-4 gap-4 items-start p-3">
+              <div class="col-span-1 flex justify-center">
+                <div class="relative">
+                  <div class="donut-md">
+                    <app-donut-chart [dimensionData]="item" [index]="i + 5"></app-donut-chart>
+                  </div>
+                  <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 py-0.5 rounded-full border border-[#F77FBE]/30">
+                    <span class="text-xs font-bold" style="color: #371A2D;">{{ item.value }}%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-span-3">
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="text-sm font-semibold" style="color:#371A2D;">{{ item.name }}</h4>
+                  <span class="text-xs px-2 py-0.5 rounded-full" 
+                        [ngClass]="{
+                          'bg-green-100 text-green-800': item.value >= 70,
+                          'bg-yellow-100 text-yellow-800': item.value >= 50 && item.value < 70,
+                          'bg-red-100 text-red-800': item.value < 50
+                        }">
+                    {{ getScoreLabel(item.value) }}
+                  </span>
+                </div>
+                
+                <div *ngIf="!isEditingDonuts[1]">
+                  <p class="text-xs leading-relaxed" style="color:#432338;">
+                    {{ getDonutDescription(i + 5) }}
+                  </p>
+                </div>
+                
+                <div *ngIf="isEditingDonuts[1]" class="space-y-2">
+                  <textarea [(ngModel)]="tempDonutDescriptions[i + 5]" 
+                            rows="3"
+                            class="w-full p-2 text-xs border border-[#F77FBE] rounded-lg focus:ring-1 focus:ring-[#F77FBE] focus:border-transparent"
+                            style="color:#432338; background: white;"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+<app-navbar></app-navbar>
+
+<div class="survey-dashboard min-h-screen bg-white p-2 md:p-4">
+  <div class="flex flex-col lg:flex-row h-full gap-2 md:gap-4 max-w-15xl mx-auto">
+    
+    <!-- Left Sidebar - Survey List -->
+<div class="w-full lg:w-64 lg:flex-shrink-0 bg-white rounded-2xl shadow-lg border border-[#F77FBE]/30 p-3 md:p-4">
+  <div class="mb-6 pb-4 border-b border-[#FFE1F7] flex justify-between items-center">
+    <h2 class="text-lg font-bold text-[#371A2D]">Customer Name</h2>
+    <div class="flex gap-1">
+      <button 
+        (click)="sendToBackend()"
+        class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors"
+        title="Send Charts to Backend"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+      </button>
+      <button 
+        (click)="exportAllCharts()"
+        class="p-2 rounded-lg hover:bg-[#FFE1F7] transition-colors"
+        title="Export All Charts"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-sm font-semibold mb-3 uppercase tracking-wider text-[#371A2D]">Survey List</h3>
+    <div class="space-y-2">
+      <div *ngFor="let survey of surveys" 
+           [class.bg-[#FFE1F7]]="selectedSurvey?.name === survey.name"
+           [class.border-[#F77FBE]]="selectedSurvey?.name === survey.name"
+           class="p-3 rounded-xl border border-[#FFE1F7] cursor-pointer hover:border-[#F77FBE] transition-colors"
+           (click)="selectSurvey(survey)">
+        <div class="flex justify-between items-start mb-1">
+          <div class="font-medium text-sm text-[#371A2D]">{{survey.name}}</div>
+          <!-- Status indicator dot -->
+          <div class="flex items-center gap-1">
+            <span *ngIf="survey.status === 'active'" 
+                  class="w-2 h-2 rounded-full bg-green-500" 
+                  title="Completed"></span>
+            <span *ngIf="survey.status === 'inactive'" 
+                  class="w-2 h-2 rounded-full bg-yellow-500" 
+                  title="In Progress"></span>
+            <span *ngIf="survey.status === 'draft'" 
+                  class="w-2 h-2 rounded-full bg-gray-400" 
+                  title="Draft"></span>
+          </div>
+        </div>
+        <div class="text-xs text-[#432338]">{{survey.responses}} responses • {{survey.date}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col gap-4 md:gap-6 overflow-y-auto max-h-[calc(100vh-2rem)] pr-2">
+
+      <!-- Survey Info Header -->
+      <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-[#371A2D]">{{selectedSurvey?.name || 'Q4 2024 Team Survey'}}</h2>
+            <div class="flex flex-wrap gap-4 mt-2">
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-xs text-[#432338]">Start Date: {{getStartDate()}}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-xs text-[#432338]">Tentative End: {{getEndDate()}}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span class="text-xs text-[#432338]">Responses: {{getResponseCount()}}/100</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-medium px-3 py-1 rounded-full bg-[#D1FAE5] text-[#065F46]" 
+                  *ngIf="selectedSurvey?.status === 'active' || !selectedSurvey">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Completed
+            </span>
+            <span class="text-xs font-medium px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E]" 
+                  *ngIf="selectedSurvey?.status === 'inactive'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              In Progress
+            </span>
+            <span class="text-xs font-medium px-3 py-1 rounded-full bg-[#FEE2E2] text-[#991B1B]" 
+                  *ngIf="selectedSurvey?.status === 'draft'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Draft
+            </span>
+            <span class="text-xs text-gray-500">Updated: {{selectedSurvey?.date || '2 days ago'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content based on survey status -->
+      <div *ngIf="selectedSurvey?.status === 'inactive'">
+        <!-- In Progress / Draft Survey View -->
+<div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 border border-[#F77FBE]/30 flex flex-col items-center justify-center text-center min-h-[500px]">  <div class="w-24 h-24 rounded-full bg-[#FFE1F7] flex items-center justify-center mb-6">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  </div>
+  <h3 class="text-xl font-semibold mb-3 text-[#371A2D]">Survey In Progress</h3>
+  <p class="text-sm max-w-md mb-6 text-[#432338]">
+    This survey is currently being analyzed. Reports and charts will be available once the analysis is complete.
+    Expected completion: {{getExpectedCompletionDate()}}
+  </p>
+  <div class="flex flex-col sm:flex-row gap-3">
+    <button (click)="completeSurvey()" 
+            class="px-4 py-2 text-sm font-medium rounded-lg bg-[#F77FBE] text-white hover:opacity-90 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      Complete Survey
+    </button>
+  </div>
+</div>
+      </div>
+
+      <!-- Active Survey Content (only show if active) -->
+      <div *ngIf="selectedSurvey?.status === 'active' || !selectedSurvey">
+        
+        <!-- Scatter Plot -->
+        <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+          <div class="mb-4">
+            <h3 class="text-base font-semibold text-[#371A2D]">Team Performance Matrix</h3>
+            <p class="text-xs text-[#432338]">Motivation vs Psychological Safety across teams</p>
+          </div>
+          
+          <div class="space-y-6">
+            <!-- Chart -->
+            <div class="h-80 md:h-96 border-b border-[#FFE1F7] pb-6">
+              <app-scatter-chart (pointClick)="onPointClick($event)"></app-scatter-chart>
+            </div>
+            
+            <!-- Description -->
+            <div class="relative">
+              <div class="flex justify-between items-start mb-3">
+                <h4 class="text-sm font-semibold text-[#371A2D]">Analysis & Insights</h4>
+                <div class="flex gap-1">
+                  <button *ngIf="!isEditing['scatter']" (click)="toggleEdit('scatter')" 
+                          class="p-1.5 rounded-lg hover:bg-[#FFE1F7] transition-colors" title="Edit Description">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <div *ngIf="isEditing['scatter']" class="flex gap-1">
+                    <button (click)="saveDescription('scatter')" 
+                            class="p-1.5 rounded-lg bg-[#F77FBE] text-white hover:opacity-90 transition-colors" title="Save">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                    <button (click)="cancelEdit('scatter')" 
+                            class="p-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors" title="Cancel">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div *ngIf="!isEditing['scatter']" class="text-sm leading-relaxed text-[#432338]">
+                {{descriptions.scatter}}
+              </div>
+              
+              <div *ngIf="isEditing['scatter']" class="space-y-3">
+                <textarea [(ngModel)]="descriptions.scatter" 
+                         rows="6"
+                         class="w-full p-3 text-sm border border-[#F77FBE] rounded-lg focus:ring-1 focus:ring-[#F77FBE] focus:border-transparent text-[#432338] bg-white"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add spacing between scatter and bar chart -->
+        <div class="h-4"></div>
+
+        <!-- Bar Chart -->
+        <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+          <div class="mb-4">
+            <h3 class="text-base font-semibold text-[#371A2D]">Dimension Scores</h3>
+            <p class="text-xs text-[#432338]">Average score across core engagement dimensions</p>
+          </div>
+          
+          <div class="space-y-6">
+            <!-- Chart -->
+            <div class="h-80 md:h-96 border-b border-[#FFE1F7] pb-6">
+              <app-bar-chart [data]="barChartData" [title]="''"></app-bar-chart>
+            </div>
+            
+            <!-- Description -->
+            <div class="relative">
+              <div class="flex justify-between items-start mb-3">
+                <h4 class="text-sm font-semibold text-[#371A2D]">Analysis & Insights</h4>
+                <div class="flex gap-1">
+                  <button *ngIf="!isEditing['bar']" (click)="toggleEdit('bar')" 
+                          class="p-1.5 rounded-lg hover:bg-[#FFE1F7] transition-colors" title="Edit Description">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <div *ngIf="isEditing['bar']" class="flex gap-1">
+                    <button (click)="saveDescription('bar')" 
+                            class="p-1.5 rounded-lg bg-[#F77FBE] text-white hover:opacity-90 transition-colors" title="Save">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                    <button (click)="cancelEdit('bar')" 
+                            class="p-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors" title="Cancel">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div *ngIf="!isEditing['bar']" class="text-sm leading-relaxed text-[#432338]">
+                {{descriptions.bar}}
+              </div>
+              
+              <div *ngIf="isEditing['bar']" class="space-y-3">
+                <textarea [(ngModel)]="descriptions.bar" 
+                         rows="6"
+                         class="w-full p-3 text-sm border border-[#F77FBE] rounded-lg focus:ring-1 focus:ring-[#F77FBE] focus:border-transparent text-[#432338] bg-white"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add spacing between bar chart and donut charts -->
+        <div class="h-6"></div>
+
+     <!-- Donut Charts -->
+<!-- Donut Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  
+  <!-- Core Engagement Drivers -->
+  <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+    <div class="mb-4">
+      <h3 class="text-base font-semibold text-[#371A2D]">Core Engagement Drivers</h3>
+      <p class="text-xs text-[#432338]">Foundational behaviors influencing daily engagement</p>
+    </div>
+
+    <div class="space-y-5">
+      <div *ngFor="let item of barChartData.slice(0,5); let i = index" 
+           class="grid grid-cols-4 gap-4 items-start p-3">
+        <div class="col-span-1 flex justify-center">
+          <div class="relative">
+            <div class="h-20 w-20">
+              <app-donut-chart [dimensionData]="item" [index]="i"></app-donut-chart>
+            </div>
+         
+          </div>
+        </div>
+        
+        <div class="col-span-3">
+          <div class="flex justify-between items-start mb-1">
+            <div class="flex items-center gap-2">
+              <h4 class="text-sm font-semibold text-[#371A2D]">{{ item.name }}</h4>
+              <!-- Removed the highlighted text label here -->
+            </div>
+            <div class="flex gap-1">
+              <!-- Individual Edit Button -->
+              <button *ngIf="!isEditingDonut(i)" 
+                      (click)="startIndividualDonutEdit(i)" 
+                      class="p-1 rounded hover:bg-[#FFE1F7] transition-colors" 
+                      title="Edit Description">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              
+              <!-- Individual Edit Actions -->
+              <div *ngIf="isEditingDonut(i)" class="flex gap-1">
+                <button (click)="saveIndividualDonutDescription(i)" 
+                        class="p-1 rounded bg-[#F77FBE] text-white hover:opacity-90 transition-colors" title="Save">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+                <button (click)="cancelIndividualDonutEdit(i)" 
+                        class="p-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors" title="Cancel">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Display or Edit Description -->
+          <div *ngIf="!isEditingDonut(i)">
+            <p class="text-xs leading-relaxed text-[#432338]">
+              {{ getDonutDescription(i) }}
+            </p>
+          </div>
+          
+          <div *ngIf="isEditingDonut(i)" class="space-y-2">
+            <textarea [(ngModel)]="tempDonutDescriptions[i]" 
+                      rows="3"
+                      class="w-full p-2 text-xs border border-[#F77FBE] rounded-lg focus:ring-1 focus:ring-[#F77FBE] focus:border-transparent text-[#432338] bg-white"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Growth & Trust Indicators -->
+  <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-[#F77FBE]/30">
+    <div class="mb-4">
+      <h3 class="text-base font-semibold text-[#371A2D]">Growth & Trust Indicators</h3>
+      <p class="text-xs text-[#432338]">Signals of learning, purpose, and team safety</p>
+    </div>
+
+    <div class="space-y-5">
+      <div *ngFor="let item of barChartData.slice(5); let i = index" 
+           class="grid grid-cols-4 gap-4 items-start p-3">
+        <div class="col-span-1 flex justify-center">
+          <div class="relative">
+            <div class="h-20 w-20">
+              <app-donut-chart [dimensionData]="item" [index]="i + 5"></app-donut-chart>
+            </div>
+         
+          </div>
+        </div>
+        
+        <div class="col-span-3">
+          <div class="flex justify-between items-start mb-1">
+            <div class="flex items-center gap-2">
+              <h4 class="text-sm font-semibold text-[#371A2D]">{{ item.name }}</h4>
+              <!-- Removed the highlighted text label here -->
+            </div>
+            <div class="flex gap-1">
+              <!-- Individual Edit Button -->
+              <button *ngIf="!isEditingDonut(i + 5)" 
+                      (click)="startIndividualDonutEdit(i + 5)" 
+                      class="p-1 rounded hover:bg-[#FFE1F7] transition-colors" 
+                      title="Edit Description">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-[#F77FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              
+              <!-- Individual Edit Actions -->
+              <div *ngIf="isEditingDonut(i + 5)" class="flex gap-1">
+                <button (click)="saveIndividualDonutDescription(i + 5)" 
+                        class="p-1 rounded bg-[#F77FBE] text-white hover:opacity-90 transition-colors" title="Save">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+                <button (click)="cancelIndividualDonutEdit(i + 5)" 
+                        class="p-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors" title="Cancel">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Display or Edit Description -->
+          <div *ngIf="!isEditingDonut(i + 5)">
+            <p class="text-xs leading-relaxed text-[#432338]">
+              {{ getDonutDescription(i + 5) }}
+            </p>
+          </div>
+          
+          <div *ngIf="isEditingDonut(i + 5)" class="space-y-2">
+            <textarea [(ngModel)]="tempDonutDescriptions[i + 5]" 
+                      rows="3"
+                      class="w-full p-2 text-xs border border-[#F77FBE] rounded-lg focus:ring-1 focus:ring-[#F77FBE] focus:border-transparent text-[#432338] bg-white"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
     </div>
   </div>
 </div>

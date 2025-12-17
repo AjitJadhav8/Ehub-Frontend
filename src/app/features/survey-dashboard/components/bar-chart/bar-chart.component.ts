@@ -15,7 +15,6 @@ export class BarChartComponent implements AfterViewInit, OnChanges {
   
   private myChart: any = null;
 
-  // Default data if none provided
   private readonly defaultData = [
     { name: 'Accountability', value: 80 },
     { name: 'Autonomy', value: 63.75 },
@@ -40,221 +39,100 @@ export class BarChartComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  // private initChart(): void {
-  //   if (!this.chartContainer?.nativeElement) return;
+  private initChart(): void {
+    if (!this.chartContainer?.nativeElement) return;
 
-  //   if (this.myChart) {
-  //     this.myChart.dispose();
-  //   }
+    if (this.myChart) {
+      this.myChart.dispose();
+    }
 
-  //   this.myChart = echarts.init(this.chartContainer.nativeElement);
+    this.myChart = echarts.init(this.chartContainer.nativeElement);
+    const container = this.chartContainer.nativeElement;
+    container.style.padding = '0';
+    container.style.margin = '0';
+    container.style.height = '100%';
+    container.style.width = '100%';
     
-  //   // Use provided data or default data
-  //   const chartData = this.data.length > 0 ? this.data : this.defaultData;
-    
-  //   // Sort data by value (descending)
-  //   const sortedData = [...chartData].sort((a, b) => b.value - a.value);
+    const chartData = this.data.length > 0 ? this.data : this.defaultData;
+    const displayData = [...chartData];
 
-  //   const option = {
-  //     backgroundColor: 'transparent',
-  //     toolbox: {
-  //       show: false
-  //     },
-  //     title: {
-  //       text: this.title,
-  //       left: 'center',
-  //       textStyle: {
-  //         color: '#371A2D',
-  //         fontSize: 16,
-  //         fontWeight: 'bold'
-  //       }
-  //     },
-  //     tooltip: {
-  //       trigger: 'axis',
-  //       axisPointer: {
-  //         type: 'shadow'
-  //       },
-  //       formatter: (params: any) => {
-  //         const data = params[0];
-  //         return `
-  //           <div style="font-weight: bold;">${data.name}</div>
-  //           <div>Score: <b>${data.value}%</b></div>
-  //         `;
-  //       },
-  //       backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  //       borderColor: '#F77FBE',
-  //       borderWidth: 1,
-  //       textStyle: {
-  //         color: '#432338'
-  //       }
-  //     },
-  //     grid: {
-  //       left: '15%',
-  //       right: '5%',
-  //       bottom: '10%',
-  //       top: '20%',
-  //       containLabel: false
-  //     },
-  //     xAxis: {
-  //       type: 'value',
-  //       min: 0,
-  //       max: 100,
-  //       interval: 10,
-  //       axisLabel: {
-  //         color: '#432338',
-  //         fontSize: 10,
-  //         formatter: '{value}%'
-  //       },
-  //       axisLine: {
-  //         lineStyle: {
-  //           color: '#F77FBE',
-  //           width: 1.5
-  //         }
-  //       },
-  //       splitLine: {
-  //         show: true,
-  //         lineStyle: {
-  //           color: '#FFE1F7',
-  //           type: 'dashed'
-  //         }
-  //       }
-  //     },
-  //     yAxis: {
-  //       type: 'category',
-  //       data: sortedData.map(item => item.name),
-  //       axisLabel: {
-  //         color: '#432338',
-  //         fontSize: 11,
-  //         width: 100,
-  //         overflow: 'truncate'
-  //       },
-  //       axisLine: {
-  //         lineStyle: {
-  //           color: '#F77FBE',
-  //           width: 1.5
-  //         }
-  //       },
-  //       axisTick: {
-  //         show: false
-  //       }
-  //     },
-  //     series: [
-  //       {
-  //         name: 'Score',
-  //         type: 'bar',
-  //         data: sortedData.map(item => ({
-  //           name: item.name,
-  //           value: item.value,
-  //           itemStyle: {
-  //             color: this.getBarColor(item.value)
-  //           }
-  //         })),
-  //         label: {
-  //           show: true,
-  //           position: 'right',
-  //           formatter: '{c}%',
-  //           color: '#432338',
-  //           fontSize: 10
-  //         },
-  //         barWidth: '60%'
-  //       }
-  //     ]
-  //   };
+    const option = {
+      backgroundColor: 'transparent',
+      grid: { left: '10%', right: '5%', bottom: '5%', top: '5%', containLabel: false },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any) => {
+          const d = params[0];
+          return `<div style="font-weight:bold;color:#371A2D;">${d.name}</div>
+                  <div style="color:#432338;">Score: <b>${d.value}</b></div>`;
+        },
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderColor: '#F77FBE',
+        borderWidth: 2,
+        textStyle: { color: '#432338' },
+        padding: [8, 12]
+      },
+      xAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        interval: 10,
+        axisLabel: {
+          color: '#432338',
+          fontSize: 10,
+          formatter: '{value}',   // ❌ removed %
+          fontFamily: 'Poppins'
+        },
+        axisLine: { lineStyle: { color: '#F77FBE', width: 1.5 } },
+        splitLine: { show: true, lineStyle: { color: '#FFE1F7', type: 'dashed' } }
+      },
+      yAxis: {
+        type: 'category',
+        data: displayData.map(i => i.name),
+        axisLabel: {
+          color: '#432338',
+          fontSize: 11,
+          width: 100,
+          overflow: 'truncate',
+          fontFamily: 'Poppins'
+        },
+        axisLine: { lineStyle: { color: '#F77FBE', width: 1.5 } },
+        axisTick: { show: false }
+      },
+      series: [{
+        name: 'Score',
+        type: 'bar',
+        data: displayData.map(item => ({
+          name: item.name,
+          value: item.value,
+          itemStyle: { color: this.getBarColor(item.value) }
+        })),
+        label: {
+          show: true,
+          position: 'right',
+          formatter: '{c}',   // ❌ removed %
+          color: '#432338',
+          fontSize: 10,
+          fontFamily: 'Poppins',
+          fontWeight: 'bold'
+        },
+        barWidth: '40%',
+        itemStyle: {
+          borderRadius: [0, 8, 8, 0]
+        }
+      }]
+    };
 
-  //   this.myChart.setOption(option);
-
-  //   // Handle resize
-  //   window.addEventListener('resize', () => {
-  //     this.resizeChart();
-  //   });
-  // }
-private initChart(): void {
-  if (!this.chartContainer?.nativeElement) return;
-
-  if (this.myChart) {
-    this.myChart.dispose();
+    this.myChart.setOption(option);
+    window.addEventListener('resize', () => { this.resizeChart(); });
+    setTimeout(() => { this.myChart.resize(); }, 0);
   }
 
-  this.myChart = echarts.init(this.chartContainer.nativeElement);
-  const container = this.chartContainer.nativeElement;
-  container.style.padding = '0';
-  container.style.margin = '0';
-  container.style.height = '100%';
-  container.style.width = '100%';
-  
-  const chartData = this.data.length > 0 ? this.data : this.defaultData;
-  // Keep original sequence - do NOT sort
-  const displayData = [...chartData];
-
-  const option = {
-    backgroundColor: 'transparent',
-    grid: { left: '10%', right: '5%', bottom: '5%', top: '5%', containLabel: false },
-    tooltip: {
-      trigger: 'axis', 
-      axisPointer: { type: 'shadow' },
-      formatter: (params: any) => {
-        const data = params[0];
-        return `<div style="font-weight: bold; color: #371A2D;">${data.name}</div>
-                <div style="color: #432338;">Score: <b>${data.value}%</b></div>`;
-      },
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#F77FBE', 
-      borderWidth: 2,
-      textStyle: { color: '#432338' },
-      padding: [8, 12]
-    },
-    xAxis: {
-      type: 'value', 
-      min: 0, 
-      max: 100, 
-      interval: 10,
-      axisLabel: { color: '#432338', fontSize: 10, formatter: '{value}%', fontFamily: 'Poppins' },
-      axisLine: { lineStyle: { color: '#F77FBE', width: 1.5 } },
-      splitLine: { show: true, lineStyle: { color: '#FFE1F7', type: 'dashed' } }
-    },
-    yAxis: {
-      type: 'category',
-      data: displayData.map(item => item.name),
-      axisLabel: { 
-        color: '#432338', 
-        fontSize: 11, 
-        width: 100, 
-        overflow: 'truncate',
-        fontFamily: 'Poppins'
-      },
-      axisLine: { lineStyle: { color: '#F77FBE', width: 1.5 } },
-      axisTick: { show: false }
-    },
-    series: [{
-      name: 'Score', 
-      type: 'bar',
-      data: displayData.map(item => ({
-        name: item.name,
-        value: item.value,
-        itemStyle: { color: this.getBarColor(item.value) }
-      })),
-      label: { 
-        show: true, 
-        position: 'right', 
-        formatter: '{c}%', 
-        color: '#432338', 
-        fontSize: 10,
-        fontFamily: 'Poppins',
-        fontWeight: 'bold'
-      },
-      barWidth: '40%',
-      itemStyle: {
-        borderRadius: [0, 8, 8, 0]
-      }
-    }]
-  };
-
-  this.myChart.setOption(option);
-  window.addEventListener('resize', () => { this.resizeChart(); });
-  setTimeout(() => { this.myChart.resize(); }, 0);
-}
   private getBarColor(value: number): string {
-    return '#F77FBE'; // Pink accent color for all bars
+    if (value >= 80) return '#22c55e'; // green
+    if (value >= 60) return '#facc15'; // yellow
+    return '#ef4444';                  // red
   }
 
   resizeChart(): void {
@@ -270,3 +148,4 @@ private initChart(): void {
     }
   }
 }
+

@@ -1,58 +1,238 @@
-.survey-dashboard {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+/* .survey-dashboard {
+  font-family: 'Poppins', sans-serif;
+  background: #FFFFFF;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: #FFE1F7;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: #F77FBE;
-  border-radius: 4px;
+  border-radius: 6px;
+  border: 2px solid #FFE1F7;
 }
 
-/* Smooth transitions */
-.bg-white {
-  transition: box-shadow 0.3s ease;
-}
-
-.bg-white:hover {
-  box-shadow: 0 8px 25px rgba(247, 127, 190, 0.15);
-}
-
-/* Remove margin from charts */
 app-scatter-chart,
 app-bar-chart,
 app-donut-chart {
   height: 100%;
   width: 100%;
   display: block;
-  overflow: hidden;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-  .w-56 {
-    width: 14rem;
+.donut-md {
+  height: 85px;
+  width: 85px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 150px;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+}
+
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(247, 127, 190, 0.2);
+  border-color: #F77FBE;
+}
+
+@media (max-width: 1024px) {
+  .donut-md {
+    height: 75px;
+    width: 75px;
   }
 }
 
 @media (max-width: 768px) {
   .survey-dashboard {
-    flex-direction: column;
+    padding: 1rem;
   }
   
-  .w-56 {
-    width: 100%;
-    max-height: 120px;
-    border-right: none;
-    border-bottom: 1px solid #F77FBE;
+  .donut-md {
+    height: 70px;
+    width: 70px;
+  }
+  
+  .grid-cols-4 {
+    grid-template-columns: 1fr 3fr;
+  }
+}
+.swal2-container.swal2-top-end {
+  top: 1rem;
+  right: 1rem;
+  left: auto;
+}
+
+.toast-popup {
+  font-family: 'Poppins', sans-serif;
+  border-radius: 0.75rem !important;
+  border: 1px solid #F77FBE;
+  box-shadow: 0 4px 12px rgba(247, 127, 190, 0.15) !important;
+}
+
+.swal2-title {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: #371A2D !important;
+}
+
+.swal2-timer-progress-bar {
+  background: #F77FBE !important;
+} */
+
+
+
+/* ------------------------------------------------------------------------------- */
+
+.survey-dashboard {
+  font-family: 'Poppins', sans-serif;
+  background: #FFFFFF;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFE1F7;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #F77FBE;
+  border-radius: 6px;
+  border: 2px solid #FFE1F7;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #F567AD;
+}
+
+/* Ensure charts fill their containers */
+app-scatter-chart,
+app-bar-chart,
+app-donut-chart {
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+
+app-scatter-chart,
+app-bar-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Textarea styling */
+textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(247, 127, 190, 0.2);
+  border-color: #F77FBE;
+}
+
+/* Toast notifications styling */
+.swal2-container.swal2-top-end {
+  top: 1rem;
+  right: 1rem;
+  left: auto;
+}
+
+.toast-popup {
+  border-radius: 0.75rem !important;
+  border: 1px solid #F77FBE !important;
+  box-shadow: 0 4px 12px rgba(247, 127, 190, 0.15) !important;
+}
+
+.swal2-title {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: #371A2D !important;
+}
+
+.swal2-timer-progress-bar {
+  background: #F77FBE !important;
+}
+
+/* Hover effects */
+button:hover {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom border colors */
+.border-b {
+  border-bottom-width: 1px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: 1fr 3fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .survey-dashboard {
+    padding: 1rem;
+  }
+  
+  .h-80 {
+    height: 18rem;
+  }
+  
+  .md\:h-96 {
+    height: 20rem;
+  }
+  
+  .h-20 {
+    height: 5rem;
+  }
+  
+  .w-20 {
+    width: 5rem;
+  }
+}
+
+/* Firefox scrollbar */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #F77FBE #FFE1F7;
+}
+
+/* Print styles */
+@media print {
+  .survey-dashboard {
+    background: white !important;
+  }
+  
+  .bg-white {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+  
+  button {
+    display: none !important;
+  }
+  
+  textarea {
+    border: none !important;
+    box-shadow: none !important;
   }
 }

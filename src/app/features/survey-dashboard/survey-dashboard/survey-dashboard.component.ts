@@ -8,18 +8,102 @@ import { NavbarComponent } from "../../../shared/components/navbar/navbar.compon
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+
+
+interface DescriptionData {
+  scatter: string;
+  bar: string;
+  donuts: string[];
+}
+
+interface Survey {
+  name: string;
+  responses: number;
+  status: string;
+  date: string;
+}
+
+interface ChartData {
+  name: string;
+  value: number;
+}
+
+interface ExportOptions {
+  scatter: boolean;
+  bar: boolean;
+  donuts1: boolean;
+  donuts2: boolean;
+}
+
+interface EditingState {
+  scatter: boolean;
+  bar: boolean;
+  donuts1: boolean;
+  donuts2: boolean;
+}
+
 
 @Component({
   selector: 'app-survey-dashboard',
   standalone: true,
-  imports: [CommonModule, BarChartComponent, DonutChartComponent, ScatterChartComponent, NavbarComponent],
+  imports: [CommonModule, BarChartComponent, DonutChartComponent, ScatterChartComponent, NavbarComponent, FormsModule],
   templateUrl: './survey-dashboard.component.html',
   styleUrl: './survey-dashboard.component.css'
 })
 export class SurveyDashboardComponent implements AfterViewInit {
+  // Add this property to track individual donut editing
+editingDonutIndex: number | null = null;
+
+// Check if a specific donut is being edited
+isEditingDonut(index: number): boolean {
+  return this.editingDonutIndex === index;
+}
+
+// Start editing individual donut
+startIndividualDonutEdit(index: number): void {
+  this.editingDonutIndex = index;
+  // Store the current description in temp variable
+  this.tempDonutDescriptions[index] = this.descriptions.donuts[index];
+}
+
+// Save individual donut description
+saveIndividualDonutDescription(index: number): void {
+  this.descriptions.donuts[index] = this.tempDonutDescriptions[index];
+  this.editingDonutIndex = null;
+  this.showSuccessToast(`${this.barChartData[index].name} description has been updated.`);
+}
+
+// Cancel individual donut edit
+cancelIndividualDonutEdit(index: number): void {
+  this.editingDonutIndex = null;
+  // Optionally reset the temp description
+  this.tempDonutDescriptions[index] = this.descriptions.donuts[index];
+  this.showInfoToast('Edit cancelled.');
+}
+
+// Reset individual donut description to AI content
+resetIndividualDonutDescription(index: number): void {
+  this.tempDonutDescriptions[index] = this.originalDonutDescriptions[index];
+  const dimensionName = this.barChartData[index].name;
+  this.showInfoToast(`${dimensionName} description has been reset to AI content.`);
+}
+
+// Also update the existing resetSingleDonutDescription to use the new method
+resetSingleDonutDescription(index: number): void {
+  this.resetIndividualDonutDescription(index);
+}
+  // selectedSurvey: Survey | null = null;
+selectSurvey(survey: Survey): void {
+  this.selectedSurvey = survey;
+  this.showInfoToast(`Loading ${survey.name}...`);
   
-  // Bar chart data
-  barChartData = [
+  // If survey is inactive (in progress), show appropriate message
+  if (survey.status === 'inactive') {
+    console.log(`Survey "${survey.name}" is in progress - showing analysis status`);
+  }
+}
+  barChartData: ChartData[] = [
     { name: 'Accountability', value: 80 },
     { name: 'Autonomy', value: 63.75 },
     { name: 'Collaboration', value: 71.88 },
@@ -30,105 +114,335 @@ export class SurveyDashboardComponent implements AfterViewInit {
     { name: 'Relatedness', value: 63.75 },
     { name: 'Vulnerability', value: 69.38 }
   ];
+getStartDate(): string {
+  if (this.selectedSurvey?.name === 'Q4 2024 Team Survey') return 'Oct 1, 2024';
+  if (this.selectedSurvey?.name === 'Q3 2024 Team Survey') return 'Jul 1, 2024';
+  if (this.selectedSurvey?.name === 'Q2 2024 Team Survey') return 'Apr 1, 2024';
+  if (this.selectedSurvey?.name === 'Q1 2024 Team Survey') return 'Jan 1, 2024';
+  if (this.selectedSurvey?.name === 'Q4 2023 Team Survey') return 'Oct 1, 2023';
+  if (this.selectedSurvey?.name === 'Q3 2023 Team Survey') return 'Jul 1, 2023';
+  return 'Oct 1, 2024'; // Default
+}
 
-  // Survey data
-  surveys = [
-    { name: 'Q4 2024 Team Survey', responses: 72, status: 'active', date: '2 days ago' },
-    { name: 'Q3 2024 Team Survey', responses: 68, status: 'inactive', date: 'Sep 2024' },
-    { name: 'Q2 2024 Team Survey', responses: 65, status: 'inactive', date: 'Jun 2024' },
-    { name: 'Q1 2024 Team Survey', responses: 63, status: 'inactive', date: 'Mar 2024' },
-    { name: 'Q4 2023 Team Survey', responses: 60, status: 'inactive', date: 'Dec 2023' },
-    { name: 'Q3 2023 Team Survey', responses: 58, status: 'inactive', date: 'Sep 2023' }
-  ];
+getEndDate(): string {
+  if (this.selectedSurvey?.name === 'Q4 2024 Team Survey') return 'Dec 31, 2024';
+  if (this.selectedSurvey?.name === 'Q3 2024 Team Survey') return 'Sep 30, 2024';
+  if (this.selectedSurvey?.name === 'Q2 2024 Team Survey') return 'Jun 30, 2024';
+  if (this.selectedSurvey?.name === 'Q1 2024 Team Survey') return 'Mar 31, 2024';
+  if (this.selectedSurvey?.name === 'Q4 2023 Team Survey') return 'Dec 31, 2023';
+  if (this.selectedSurvey?.name === 'Q3 2023 Team Survey') return 'Sep 30, 2023';
+  return 'Dec 31, 2024'; // Default
+}
+getResponseCount(): number {
+  return this.selectedSurvey?.responses || 72;
+}
 
-  // Export options with default selections
-  exportOptions = {
+getProgressPercentage(): number {
+  return this.selectedSurvey?.responses || 72;
+}
+
+getStatusLabel(): string {
+  if (this.selectedSurvey?.status === 'active') return 'Completed';
+  if (this.selectedSurvey?.status === 'inactive') return 'In Progress';
+  return 'Completed'; // Default
+}
+
+getExpectedCompletionDate(): string {
+  if (this.selectedSurvey?.name === 'Q3 2024 Team Survey') return 'Oct 15, 2024';
+  if (this.selectedSurvey?.name === 'Q2 2024 Team Survey') return 'Jul 15, 2024';
+  if (this.selectedSurvey?.name === 'Q1 2024 Team Survey') return 'Apr 15, 2024';
+  if (this.selectedSurvey?.name === 'Q4 2023 Team Survey') return 'Jan 15, 2024';
+  if (this.selectedSurvey?.name === 'Q3 2023 Team Survey') return 'Oct 15, 2023';
+  return 'Oct 15, 2024'; // Default
+}
+surveys: Survey[] = [
+  { name: 'Q4 2024 Team Survey', responses: 72, status: 'active', date: '2 days ago' },
+  { name: 'Q3 2024 Team Survey', responses: 68, status: 'inactive', date: 'Sep 2024' },
+  { name: 'Q2 2024 Team Survey', responses: 65, status: 'inactive', date: 'Jun 2024' },
+  { name: 'Q1 2024 Team Survey', responses: 63, status: 'inactive', date: 'Mar 2024' },
+  { name: 'Q4 2023 Team Survey', responses: 60, status: 'inactive', date: 'Dec 2023' },
+  { name: 'Q3 2023 Team Survey', responses: 58, status: 'inactive', date: 'Sep 2023' }
+];
+  selectedSurvey: Survey | null = this.surveys[0];
+
+
+  descriptions: DescriptionData = {
+    scatter: `The team exhibits a relatively balanced distribution across zones, with notable concentrations in the Apathy Zone (41.7%) and the Learning Zone (40.3%). The mean scores for motivational drivers (49.42) and psychological safety (50.05) are close to the midline, suggesting a team that is not strongly skewed toward either high or low performance environments.
+
+However, the high proportion of individuals in the Apathy Zone indicates a significant subset of the team may be disengaged or lacking the necessary psychological safety to feel motivated. Conversely, the strong presence in the Learning Zone signals that nearly half the team is thriving in an optimal environment for growth and performance.
+
+**Key Insights:**
+- 40.3% of team members are in the optimal Learning Zone
+- 41.7% require immediate attention in the Apathy Zone
+- Psychological safety (50.05) slightly exceeds motivational drivers (49.42)
+- Opportunity exists to shift members from Apathy to Learning zones`,
+
+    bar: `The dimension scores reveal varied performance across engagement factors. Accountability leads at 80%, indicating strong ownership and follow-through, while Inclusion lags at 41.88%, highlighting an area requiring immediate attention.
+
+**Top Performers (70%+):**
+- Accountability (80%): Excellent ownership culture
+- Collaboration (71.88%): Effective teamwork and communication
+- Courage (71.88%): Healthy risk-taking and speaking up
+
+**Areas for Improvement:**
+- Inclusion (41.88%): Significant improvement needed in belonging
+- Mastery (53.75%): Requires more skill development opportunities
+- Autonomy (63.75%): Could benefit from increased decision-making authority
+
+The distribution suggests strengths in execution (Accountability, Collaboration) but challenges in belonging (Inclusion) and growth (Mastery).`,
+
+    donuts: [
+      'High accountability score (80%) indicates strong ownership culture with clear responsibilities and follow-through mechanisms in place. Teams demonstrate reliable delivery and personal responsibility for outcomes.',
+      'Moderate autonomy (63.75%) suggests team members have reasonable independence but could benefit from more decision-making authority. Consider delegating more ownership of processes and outcomes.',
+      'Strong collaboration (71.88%) reflects effective teamwork, communication, and cross-functional coordination within the organization. Continue fostering cooperative problem-solving environments.',
+      'Healthy courage score (71.88%) shows willingness to take risks, speak up, and challenge the status quo when needed. Maintain environments where constructive dissent is valued.',
+      'Low inclusion (41.88%) is a concern - indicates potential issues with diversity, belonging, or equitable participation across the team. Implement inclusion initiatives and ensure all voices are heard.',
+      'Mastery score (53.75%) suggests moderate skill development - opportunities exist for enhanced training and growth pathways. Consider implementing mentorship programs and skill-building workshops.',
+      'Purpose at 63.13% indicates decent alignment with organizational mission but room for stronger connection to meaningful work. Clarify how individual roles contribute to larger objectives.',
+      'Relatedness (63.75%) shows satisfactory interpersonal connections but potential for deeper team bonding and relationship building. Foster opportunities for team building and social connection.',
+      'Vulnerability (69.38%) reflects reasonably safe environment for openness, though psychological safety could be further strengthened. Encourage sharing of failures and learning opportunities.'
+    ]
+  };
+
+  isEditing: EditingState = {
+    scatter: false,
+    bar: false,
+    donuts1: false,
+    donuts2: false
+  };
+
+  isEditingDonuts: boolean[] = [false, false];
+  tempDonutDescriptions: string[] = [...this.descriptions.donuts];
+  originalDonutDescriptions: string[] = [...this.descriptions.donuts];
+
+  exportOptions: ExportOptions = {
     scatter: true,
     bar: true,
     donuts1: true,
     donuts2: true
   };
 
-  constructor(private http: HttpClient) {}
+  originalDescriptions: DescriptionData = { ...this.descriptions };
 
-  ngAfterViewInit(): void {
-    // Any initialization logic
+  constructor(private http: HttpClient) {
+    // Initialize selectedSurvey after surveys is defined
+    if (this.surveys.length > 0) {
+      this.selectedSurvey = this.surveys[0];
+    }
+  }
+  ngAfterViewInit(): void {}
+completeSurvey(): void {}
+  getDonutDescription(index: number): string {
+    return this.descriptions.donuts[index] || '';
   }
 
+  getScoreLabel(score: number): string {
+    if (score >= 70) return 'Strong';
+    if (score >= 50) return 'Moderate';
+    return 'Needs Improvement';
+  }
+
+  toggleEdit(chartType: keyof EditingState): void {
+    this.isEditing[chartType] = !this.isEditing[chartType];
+  }
+
+ saveDescription(chartType: keyof EditingState): void {
+  this.isEditing[chartType] = false;
+  this.showSuccessToast('Description has been updated successfully.');
+}
+
+cancelEdit(chartType: keyof EditingState): void {
+  this.isEditing[chartType] = false;
+  if (chartType === 'scatter') {
+    this.descriptions.scatter = this.originalDescriptions.scatter;
+  } else if (chartType === 'bar') {
+    this.descriptions.bar = this.originalDescriptions.bar;
+  }
+  this.showInfoToast('Edit cancelled. Changes discarded.');
+}
+
+
+ resetDescription(chartType: keyof EditingState): void {
+  if (chartType === 'scatter') {
+    this.descriptions.scatter = this.originalDescriptions.scatter;
+  } else if (chartType === 'bar') {
+    this.descriptions.bar = this.originalDescriptions.bar;
+  }
+  this.isEditing[chartType] = false;
+  this.showInfoToast('Description has been reset to AI-generated analysis.');
+}
+toggleDonutEdit(groupIndex: number): void {
+  this.isEditingDonuts[groupIndex] = !this.isEditingDonuts[groupIndex];
+  if (this.isEditingDonuts[groupIndex]) {
+    this.tempDonutDescriptions = [...this.descriptions.donuts];
+  }
+}
+saveAllDonutDescriptions(groupIndex: number): void {
+  this.descriptions.donuts = [...this.tempDonutDescriptions];
+  this.isEditingDonuts[groupIndex] = false;
+  this.showSuccessToast(`All ${groupIndex === 0 ? 'Core Engagement' : 'Growth & Trust'} descriptions have been updated.`);
+}
+ cancelDonutEdit(groupIndex: number): void {
+  this.tempDonutDescriptions = [...this.originalDonutDescriptions];
+  this.isEditingDonuts[groupIndex] = false;
+  this.showInfoToast('All changes have been discarded.');
+}
+
+
+//   resetSingleDonutDescription(index: number): void {
+//   this.tempDonutDescriptions[index] = this.originalDonutDescriptions[index];
+//   const dimensionName = this.barChartData[index].name;
+//   this.showInfoToast(`${dimensionName} description has been reset to AI content.`);
+// }
+private showSuccessToast(message: string): void {
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: message,
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    background: '#ffffff',
+    iconColor: '#10b981',
+    customClass: {
+      container: 'swal-toast-container',
+      popup: 'toast-popup'
+    }
+  });
+}
+
+private showInfoToast(message: string): void {
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'info',
+    title: message,
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    background: '#ffffff',
+    iconColor: '#F77FBE',
+    customClass: {
+      container: 'swal-toast-container',
+      popup: 'toast-popup'
+    }
+  });
+}
+
+private showErrorToast(message: string): void {
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'error',
+    title: message,
+    showConfirmButton: false,
+    timer: 4000,
+    timerProgressBar: true,
+    background: '#ffffff',
+    iconColor: '#ef4444',
+    customClass: {
+      container: 'swal-toast-container',
+      popup: 'toast-popup'
+    }
+  });
+}
+
+private showLoadingToast(message: string): void {
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    title: message,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    timer: undefined,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+    background: '#ffffff',
+    customClass: {
+      container: 'swal-toast-container',
+      popup: 'toast-popup'
+    }
+  });
+}
   onPointClick(data: any): void {
     Swal.fire({
       title: data.label,
       html: `
-        <div class="text-left" style="font-family: 'Poppins', sans-serif;">
-          <div class="mb-2"><strong style="color: #371A2D;">Motivational Driver:</strong> <span style="color: #432338;">${data.x.toFixed(1)}</span></div>
-          <div class="mb-2"><strong style="color: #371A2D;">Psychological Safety:</strong> <span style="color: #432338;">${data.y.toFixed(1)}</span></div>
-          <div class="mb-2"><strong style="color: #371A2D;">Quadrant:</strong> <span style="color: #432338;">${data.quadrant}</span></div>
-          <div class="mt-3 p-3 rounded-lg bg-[#FFE1F7]/30 text-sm" style="color: #432338;">
-            <strong style="color: #371A2D;">Recommendation:</strong><br>
-            ${this.getRecommendation(data.quadrant)}
+        <div class="text-left space-y-3">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-3 rounded-lg bg-[#FFE1F7]/30">
+              <div class="text-xs font-semibold" style="color: #371A2D;">Motivational Driver</div>
+              <div class="text-lg font-bold mt-1" style="color: #F77FBE;">${data.x.toFixed(1)}</div>
+            </div>
+            <div class="p-3 rounded-lg bg-[#FFE1F7]/30">
+              <div class="text-xs font-semibold" style="color: #371A2D;">Psychological Safety</div>
+              <div class="text-lg font-bold mt-1" style="color: #F77FBE;">${data.y.toFixed(1)}</div>
+            </div>
+          </div>
+          <div class="p-3 rounded-lg border border-[#F77FBE]">
+            <div class="text-xs font-semibold mb-1" style="color: #371A2D;">Quadrant: <span style="color: #432338;">${data.quadrant}</span></div>
+            <div class="text-xs mt-2" style="color: #432338;">
+              <strong>Recommendation:</strong><br>
+              ${this.getRecommendation(data.quadrant)}
+            </div>
           </div>
         </div>
       `,
+      width: 500,
       icon: 'info',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#F77FBE',
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-xl',
-        title: 'poppins-bold',
-        htmlContainer: 'poppins-regular'
-      }
+      confirmButtonText: 'Close',
+      confirmButtonColor: '#F77FBE'
     });
   }
 
   private getRecommendation(quadrant: string): string {
-    switch(quadrant) {
-      case 'Optimal':
-        return 'Continue current practices and mentor others. Focus on maintaining high performance levels.';
-      case 'High Drive':
-        return 'Focus on improving psychological safety through better support systems and team building activities.';
-      case 'Safe':
-        return 'Boost motivation through engagement and recognition programs. Set clear performance goals.';
-      case 'At Risk':
-        return 'Requires immediate attention and support from leadership. Schedule one-on-one coaching sessions.';
-      default:
-        return 'Review performance metrics regularly and provide constructive feedback.';
-    }
+    const recommendations: { [key: string]: string } = {
+      'Optimal': 'Continue current practices and mentor others. Focus on maintaining high performance levels and sharing best practices across teams.',
+      'High Drive': 'Focus on improving psychological safety through better support systems, regular check-ins, and team building activities.',
+      'Safe': 'Boost motivation through engagement programs, recognition systems, and clear performance goals aligned with personal growth.',
+      'At Risk': 'Requires immediate attention and support from leadership. Schedule one-on-one coaching sessions and create safety nets.'
+    };
+    return recommendations[quadrant] || 'Review performance metrics regularly and provide constructive feedback.';
   }
 
-  // Method to handle survey selection
-  selectSurvey(survey: any): void {
-    console.log('Selected survey:', survey);
-    // Implement survey switching logic here
-  }
+  // selectSurvey(survey: Survey): void {
+  //   Swal.fire({
+  //     title: 'Survey Selected',
+  //     html: `<div class="text-center py-4"><div class="text-lg font-semibold" style="color: #371A2D;">${survey.name}</div><div class="text-sm mt-2" style="color: #432338;">Loading survey data...</div></div>`,
+  //     icon: 'info',
+  //     timer: 1500,
+  //     showConfirmButton: false
+  //   });
+  // }
 
-  // Send charts to backend
   sendToBackend(): void {
     Swal.fire({
       title: 'Send Charts to Backend',
       html: `
-        <div class="text-left" style="color: #432338;">
-          <p class="mb-4 text-sm">Select charts to send to backend:</p>
+        <div class="text-left space-y-4">
+          <p class="text-sm" style="color: #432338;">Select charts to send:</p>
           <div class="space-y-3">
             <label class="flex items-center space-x-3 cursor-pointer">
               <input type="checkbox" id="send-scatter-checkbox" ${this.exportOptions.scatter ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Scatter Chart (Team Performance Matrix)</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Team Performance Matrix</span>
             </label>
             <label class="flex items-center space-x-3 cursor-pointer">
               <input type="checkbox" id="send-bar-checkbox" ${this.exportOptions.bar ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Bar Chart (Dimension Scores)</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Dimension Scores</span>
             </label>
             <label class="flex items-center space-x-3 cursor-pointer">
               <input type="checkbox" id="send-donuts1-checkbox" ${this.exportOptions.donuts1 ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Donut Charts 1-5</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Core Engagement Drivers</span>
             </label>
             <label class="flex items-center space-x-3 cursor-pointer">
               <input type="checkbox" id="send-donuts2-checkbox" ${this.exportOptions.donuts2 ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Donut Charts 6-9</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Growth & Trust Indicators</span>
             </label>
           </div>
         </div>
@@ -137,12 +451,6 @@ export class SurveyDashboardComponent implements AfterViewInit {
       confirmButtonText: 'Generate & Send',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#F77FBE',
-      cancelButtonColor: '#6b7280',
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-xl',
-        htmlContainer: 'text-left'
-      },
       preConfirm: () => {
         const scatter = (document.getElementById('send-scatter-checkbox') as HTMLInputElement)?.checked || false;
         const bar = (document.getElementById('send-bar-checkbox') as HTMLInputElement)?.checked || false;
@@ -169,263 +477,103 @@ export class SurveyDashboardComponent implements AfterViewInit {
     });
   }
 
- private async generateAndSendBase64(selectedCharts: string[]): Promise<void> {
-  Swal.fire({
-    title: 'Generating Base64...',
-    html: `
-      <div class="text-center">
-        <div class="mb-4">
-          <div class="w-12 h-12 border-4 border-[#FFE1F7] border-t-[#F77FBE] rounded-full animate-spin mx-auto"></div>
-        </div>
-        <p class="text-sm" style="color: #432338;">Converting charts to Base64...</p>
-      </div>
-    `,
-    allowOutsideClick: false,
-    showConfirmButton: false,
-    background: '#ffffff',
-    customClass: {
-      popup: 'rounded-xl'
-    }
-  });
-
-  const base64Data: { [key: string]: string } = {};
-  const dateStr = new Date().toISOString().slice(0,10);
-
-  try {
-    // Generate Base64 for each selected chart
-    for (const chart of selectedCharts) {
-      let element = null;
-      
-      switch(chart) {
-        case 'scatter':
-          element = document.querySelector('app-scatter-chart')?.closest('.bg-white.rounded-2xl');
-          break;
-        case 'bar':
-          element = document.querySelector('app-bar-chart')?.closest('.bg-white.rounded-2xl');
-          break;
-        case 'donuts1':
-          element = document.querySelector('.grid-cols-5')?.parentElement;
-          break;
-        case 'donuts2':
-          element = document.querySelector('.grid-cols-4')?.parentElement;
-          break;
-      }
-
-      if (element) {
-        const canvas = await html2canvas(element as HTMLElement, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false,
-          useCORS: true
-        });
-        
-        base64Data[chart] = canvas.toDataURL('image/png');
-      }
-    }
-
-    // Close loading dialog
-    Swal.close();
-
-    // Display FULL Base64 data in console for testing
-    console.log('=== FULL BASE64 DATA FOR TESTING ===');
-    console.log('Date:', dateStr);
-    console.log('Total charts converted:', selectedCharts.length);
-    
-    selectedCharts.forEach(chart => {
-      const base64 = base64Data[chart];
-      console.log(`\n--- ${chart.toUpperCase()} CHART FULL BASE64 ---`);
-      console.log(base64); // Full Base64 string
-      console.log(`Base64 length: ${base64.length} characters`);
-    });
-
-    // Create a test object to send to backend
-    const payload = {
-      timestamp: new Date().toISOString(),
-      customerName: 'Customer Name',
-      survey: 'Q4 2024 Team Survey',
-      charts: base64Data
-    };
-
-    // Show success message with Base64 preview
+  private async generateAndSendBase64(selectedCharts: string[]): Promise<void> {
     Swal.fire({
-      title: 'Base64 Generated Successfully!',
+      title: 'Generating Base64...',
       html: `
-        <div class="text-left" style="color: #432338;">
-          <p class="mb-3 text-sm">Base64 data has been generated for ${selectedCharts.length} chart(s).</p>
-          <div class="mb-4">
-            <p class="text-xs font-semibold mb-1">FULL Base64 data logged to browser console.</p>
-            <p class="text-xs text-gray-500">(Press F12 and go to Console tab to see full Base64)</p>
-          </div>
-          <div class="space-y-2">
-            ${selectedCharts.map(chart => `
-              <div class="p-2 bg-[#FFE1F7]/30 rounded">
-                <div class="text-xs font-semibold" style="color: #371A2D;">${this.getChartDisplayName(chart)}</div>
-                <div class="text-xs mt-1 truncate">${base64Data[chart]?.substring(0, 60)}...</div>
-                <div class="text-xs text-gray-500 mt-1">Length: ${base64Data[chart]?.length} chars</div>
-              </div>
-            `).join('')}
-          </div>
-          <div class="mt-4 pt-4 border-t border-[#FFE1F7]">
-            <button id="copy-test-btn" class="text-xs px-3 py-1.5 rounded border border-[#F77FBE] text-[#F77FBE] hover:bg-[#FFE1F7] transition-colors">
-              Copy Full Base64
-            </button>
-            <button id="send-backend-btn" class="text-xs px-3 py-1.5 rounded bg-[#F77FBE] text-white hover:opacity-90 transition-colors ml-2">
-              Send to Backend
-            </button>
-          </div>
+        <div class="text-center">
+          <div class="w-12 h-12 border-4 border-[#FFE1F7] border-t-[#F77FBE] rounded-full animate-spin mx-auto"></div>
+          <p class="text-sm mt-4" style="color: #432338;">Converting charts to Base64...</p>
         </div>
       `,
-      confirmButtonText: 'Close',
-      cancelButtonText: '',
-      showConfirmButton: true,
-      showCancelButton: false,
-      confirmButtonColor: '#F77FBE',
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-xl',
-        htmlContainer: 'text-left'
-      },
-      didOpen: () => {
-        // Copy FULL Base64 button
-        document.getElementById('copy-test-btn')?.addEventListener('click', () => {
-          const firstChart = selectedCharts[0];
-          const fullBase64 = base64Data[firstChart] || '';
-          navigator.clipboard.writeText(fullBase64)
-            .then(() => {
-              Swal.fire({
-                title: 'Copied!',
-                text: `Full Base64 for ${this.getChartDisplayName(firstChart)} copied to clipboard.`,
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            })
-            .catch(err => {
-              console.error('Failed to copy:', err);
-              Swal.fire({
-                title: 'Error',
-                text: 'Failed to copy Base64 to clipboard.',
-                icon: 'error',
-                timer: 2000
-              });
-            });
-        });
+      allowOutsideClick: false,
+      showConfirmButton: false
+    });
 
-        // Send to backend button
-        document.getElementById('send-backend-btn')?.addEventListener('click', () => {
-          this.sendToBackendAPI(payload);
-        });
+    const base64Data: { [key: string]: string } = {};
+
+    try {
+      for (const chart of selectedCharts) {
+        let element = null;
+        
+        switch(chart) {
+          case 'scatter':
+            element = document.querySelector('app-scatter-chart')?.closest('.bg-white.rounded-2xl');
+            break;
+          case 'bar':
+            element = document.querySelector('app-bar-chart')?.closest('.bg-white.rounded-2xl');
+            break;
+          case 'donuts1':
+            element = document.querySelectorAll('.bg-white.rounded-2xl')[2];
+            break;
+          case 'donuts2':
+            element = document.querySelectorAll('.bg-white.rounded-2xl')[3];
+            break;
+        }
+
+        if (element) {
+          const canvas = await html2canvas(element as HTMLElement, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true
+          });
+          base64Data[chart] = canvas.toDataURL('image/png');
+        }
       }
-    });
 
-  } catch (error) {
-    console.error('Error generating Base64:', error);
-    Swal.fire({
-      title: 'Error',
-      text: 'Failed to generate Base64 data.',
-      icon: 'error',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#F77FBE'
-    });
+      Swal.close();
+      console.log('Base64 data generated:', Object.keys(base64Data));
+
+      const payload = {
+        timestamp: new Date().toISOString(),
+        customerName: 'Customer Name',
+        survey: 'Q4 2024 Team Survey',
+        charts: base64Data
+      };
+
+      Swal.fire({
+        title: 'Base64 Generated!',
+        html: `
+          <div class="text-left space-y-4">
+            <p class="text-sm" style="color: #432338;">Successfully generated Base64 for ${selectedCharts.length} chart(s).</p>
+            <div class="space-y-2">
+              ${selectedCharts.map(chart => `
+                <div class="p-3 rounded-lg bg-[#FFFAFD] border border-[#F77FBE]/30">
+                  <div class="text-xs font-semibold" style="color: #371A2D;">${this.getChartDisplayName(chart)}</div>
+                  <div class="text-xs mt-1 text-gray-500">${base64Data[chart]?.length.toLocaleString()} chars</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `,
+        confirmButtonText: 'Close',
+        confirmButtonColor: '#F77FBE'
+      });
+
+    } catch (error) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to generate Base64 data.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#F77FBE'
+      });
+    }
   }
-}
 
   private getChartDisplayName(chart: string): string {
-    switch(chart) {
-      case 'scatter': return 'Scatter Chart';
-      case 'bar': return 'Bar Chart';
-      case 'donuts1': return 'Donut Charts 1-5';
-      case 'donuts2': return 'Donut Charts 6-9';
-      default: return chart;
-    }
+    const names: { [key: string]: string } = {
+      'scatter': 'Team Performance Matrix',
+      'bar': 'Dimension Scores',
+      'donuts1': 'Core Engagement Drivers',
+      'donuts2': 'Growth & Trust Indicators'
+    };
+    return names[chart] || chart;
   }
 
-private sendToBackendAPI(payload: any): void {
-  // Replace with your actual backend API endpoint
-  const backendUrl = 'https://your-backend-api.com/api/charts/upload';
-  
-  Swal.fire({
-    title: 'Sending to Backend...',
-    html: `
-      <div class="text-center">
-        <div class="mb-4">
-          <div class="w-12 h-12 border-4 border-[#FFE1F7] border-t-[#F77FBE] rounded-full animate-spin mx-auto"></div>
-        </div>
-        <p class="text-sm" style="color: #432338;">Uploading chart data to backend...</p>
-      </div>
-    `,
-    allowOutsideClick: false,
-    showConfirmButton: false,
-    background: '#ffffff',
-    customClass: {
-      popup: 'rounded-xl'
-    }
-  });
-
-  // For testing - log FULL Base64 to console
-  setTimeout(() => {
-    Swal.close();
-    
-    console.log('=== FULL BACKEND PAYLOAD BASE64 DATA ===');
-    console.log('Timestamp:', payload.timestamp);
-    console.log('Customer:', payload.customerName);
-    console.log('Survey:', payload.survey);
-    console.log('Number of charts:', Object.keys(payload.charts).length);
-    
-    // Log FULL Base64 for each chart
-    Object.keys(payload.charts).forEach(chart => {
-      console.log(`\n--- FULL ${chart.toUpperCase()} Base64 ---`);
-      console.log(payload.charts[chart]); // FULL Base64
-      console.log(`Length: ${payload.charts[chart].length} characters`);
-    });
-    
-    // Also log the complete payload
-    console.log('\n=== COMPLETE PAYLOAD STRUCTURE ===');
-    console.log(JSON.stringify({
-      timestamp: payload.timestamp,
-      customerName: payload.customerName,
-      survey: payload.survey,
-      chartsCount: Object.keys(payload.charts).length
-    }, null, 2));
-    
-    Swal.fire({
-      title: 'Full Base64 Logged to Console!',
-      html: `
-        <div class="text-left" style="color: #432338;">
-          <p class="mb-3 text-sm">Full Base64 data for all selected charts has been logged to console.</p>
-          <div class="p-3 bg-[#FFE1F7]/30 rounded text-xs">
-            <div><strong>Timestamp:</strong> ${payload.timestamp}</div>
-            <div><strong>Customer:</strong> ${payload.customerName}</div>
-            <div><strong>Survey:</strong> ${payload.survey}</div>
-            <div><strong>Charts:</strong> ${Object.keys(payload.charts).join(', ')}</div>
-            <div><strong>Total Base64 size:</strong> ${JSON.stringify(payload.charts).length} characters</div>
-          </div>
-          <div class="mt-3 text-xs space-y-1">
-            <p><strong>To test Base64:</strong></p>
-            <ol class="list-decimal pl-4">
-              <li>Open browser console (F12)</li>
-              <li>Find the FULL Base64 string</li>
-              <li>Copy the entire string</li>
-              <li>Go to https://codebeautify.org/base64-to-image-converter</li>
-              <li>Paste and convert to verify image</li>
-            </ol>
-          </div>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#F77FBE',
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-xl'
-      }
-    });
-  }, 2000);
-}
-
-  // Export all charts as separate images with checkboxes
   exportAllCharts(): void {
-    const selectedCharts = Object.keys(this.exportOptions).filter(key => this.exportOptions[key as keyof typeof this.exportOptions]);
+    const selectedCharts = Object.keys(this.exportOptions).filter(key => this.exportOptions[key as keyof ExportOptions]) as string[];
     
     if (selectedCharts.length === 0) {
       Swal.fire({
@@ -433,49 +581,37 @@ private sendToBackendAPI(payload: any): void {
         text: 'Please select at least one chart to export.',
         icon: 'warning',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#F77FBE',
-        background: '#ffffff',
-        customClass: {
-          popup: 'rounded-xl'
-        }
+        confirmButtonColor: '#F77FBE'
       });
       return;
     }
 
     Swal.fire({
-      title: 'Export Charts',
+      title: 'Export Charts as PNG',
       html: `
-        <div class="text-left" style="color: #432338;">
-          <p class="mb-4 text-sm">Select charts to export:</p>
-          <div class="space-y-3">
-            <label class="flex items-center space-x-3 cursor-pointer">
+        <div class="text-left space-y-4">
+          <p class="text-sm" style="color: #432338;">Select charts to export:</p>
+          <div class="space-y-2">
+            <label class="flex items-center space-x-3">
               <input type="checkbox" id="scatter-checkbox" ${this.exportOptions.scatter ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Scatter Chart (Team Performance Matrix)</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Team Performance Matrix</span>
             </label>
-            <label class="flex items-center space-x-3 cursor-pointer">
+            <label class="flex items-center space-x-3">
               <input type="checkbox" id="bar-checkbox" ${this.exportOptions.bar ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Bar Chart (Dimension Scores)</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Dimension Scores</span>
             </label>
-            <label class="flex items-center space-x-3 cursor-pointer">
+            <label class="flex items-center space-x-3">
               <input type="checkbox" id="donuts1-checkbox" ${this.exportOptions.donuts1 ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Donut Charts 1-5</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Core Engagement Drivers</span>
             </label>
-            <label class="flex items-center space-x-3 cursor-pointer">
+            <label class="flex items-center space-x-3">
               <input type="checkbox" id="donuts2-checkbox" ${this.exportOptions.donuts2 ? 'checked' : ''} 
-                class="rounded border-[#F77FBE] text-[#F77FBE] focus:ring-[#F77FBE]">
-              <span class="text-sm">Donut Charts 6-9</span>
+                class="rounded border-[#F77FBE] text-[#F77FBE]">
+              <span class="text-sm">Growth & Trust Indicators</span>
             </label>
-          </div>
-          <div class="mt-6 pt-4 border-t border-[#FFE1F7]">
-            <button id="select-all-btn" class="text-xs px-3 py-1.5 rounded border border-[#F77FBE] text-[#F77FBE] hover:bg-[#FFE1F7] transition-colors">
-              Select All
-            </button>
-            <button id="deselect-all-btn" class="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors ml-2">
-              Deselect All
-            </button>
           </div>
         </div>
       `,
@@ -483,37 +619,13 @@ private sendToBackendAPI(payload: any): void {
       confirmButtonText: 'Export Selected',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#F77FBE',
-      cancelButtonColor: '#6b7280',
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-xl',
-        htmlContainer: 'text-left'
-      },
-      didOpen: () => {
-        // Select All button
-        document.getElementById('select-all-btn')?.addEventListener('click', () => {
-          ['scatter-checkbox', 'bar-checkbox', 'donuts1-checkbox', 'donuts2-checkbox'].forEach(id => {
-            const checkbox = document.getElementById(id) as HTMLInputElement;
-            if (checkbox) checkbox.checked = true;
-          });
-        });
-
-        // Deselect All button
-        document.getElementById('deselect-all-btn')?.addEventListener('click', () => {
-          ['scatter-checkbox', 'bar-checkbox', 'donuts1-checkbox', 'donuts2-checkbox'].forEach(id => {
-            const checkbox = document.getElementById(id) as HTMLInputElement;
-            if (checkbox) checkbox.checked = false;
-          });
-        });
-      },
       preConfirm: () => {
-        // Get checkbox values
         this.exportOptions.scatter = (document.getElementById('scatter-checkbox') as HTMLInputElement)?.checked || false;
         this.exportOptions.bar = (document.getElementById('bar-checkbox') as HTMLInputElement)?.checked || false;
         this.exportOptions.donuts1 = (document.getElementById('donuts1-checkbox') as HTMLInputElement)?.checked || false;
         this.exportOptions.donuts2 = (document.getElementById('donuts2-checkbox') as HTMLInputElement)?.checked || false;
 
-        const selectedCharts = Object.keys(this.exportOptions).filter(key => this.exportOptions[key as keyof typeof this.exportOptions]);
+        const selectedCharts = Object.keys(this.exportOptions).filter(key => this.exportOptions[key as keyof ExportOptions]) as string[];
         
         if (selectedCharts.length === 0) {
           Swal.showValidationMessage('Please select at least one chart to export.');
@@ -531,203 +643,95 @@ private sendToBackendAPI(payload: any): void {
 
   private startExportProcess(selectedCharts: string[]): void {
     const chartNames: { [key: string]: string } = {
-      'scatter': 'Scatter Chart',
-      'bar': 'Bar Chart',
-      'donuts1': 'Donut Group 1',
-      'donuts2': 'Donut Group 2'
+      'scatter': 'team-performance-matrix',
+      'bar': 'dimension-scores',
+      'donuts1': 'core-engagement-drivers',
+      'donuts2': 'growth-trust-indicators'
     };
 
-    const totalToExport = selectedCharts.length;
-    let exportedCount = 0;
+    const total = selectedCharts.length;
+    let completed = 0;
 
     Swal.fire({
-      title: 'Exporting...',
+      title: `Exporting ${total} Chart${total > 1 ? 's' : ''}`,
       html: `
-        <div class="text-center">
-          <div class="mb-4">
-            <div class="w-12 h-12 border-4 border-[#FFE1F7] border-t-[#F77FBE] rounded-full animate-spin mx-auto"></div>
+        <div class="space-y-4">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div id="export-progress" class="bg-[#F77FBE] h-2 rounded-full" style="width: 0%"></div>
           </div>
-          <p class="text-sm mb-2" style="color: #432338;">Exporting ${totalToExport} of ${totalToExport} charts...</p>
-          <div class="mt-4 space-y-1 text-xs" style="color: #432338;">
-            ${selectedCharts.map((chart, index) => `
-              <div>${index + 1}. ${chartNames[chart]} <span class="float-right" id="export-status-${chart}">⏳</span></div>
+          <div class="space-y-2 text-sm" style="color: #432338;">
+            ${selectedCharts.map(chart => `
+              <div class="flex justify-between items-center">
+                <span>${this.getChartDisplayName(chart)}</span>
+                <span id="status-${chart}" class="text-xs">⏳ Waiting</span>
+              </div>
             `).join('')}
           </div>
         </div>
       `,
       allowOutsideClick: false,
-      showConfirmButton: false,
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-xl'
-      }
+      showConfirmButton: false
     });
 
-    // Export selected charts in sequence
     selectedCharts.forEach((chart, index) => {
-      setTimeout(() => {
-        switch(chart) {
-          case 'scatter':
-            this.exportScatterChart().then(() => {
-              exportedCount++;
-              if (exportedCount === totalToExport) {
-                setTimeout(() => {
-                  Swal.close();
-                  this.showExportSuccess(selectedCharts);
-                }, 500);
-              }
-            });
-            break;
-          case 'bar':
-            this.exportBarChart().then(() => {
-              exportedCount++;
-              if (exportedCount === totalToExport) {
-                setTimeout(() => {
-                  Swal.close();
-                  this.showExportSuccess(selectedCharts);
-                }, 500);
-              }
-            });
-            break;
-          case 'donuts1':
-            this.exportDonutGroup1().then(() => {
-              exportedCount++;
-              if (exportedCount === totalToExport) {
-                setTimeout(() => {
-                  Swal.close();
-                  this.showExportSuccess(selectedCharts);
-                }, 500);
-              }
-            });
-            break;
-          case 'donuts2':
-            this.exportDonutGroup2().then(() => {
-              exportedCount++;
-              if (exportedCount === totalToExport) {
-                setTimeout(() => {
-                  Swal.close();
-                  this.showExportSuccess(selectedCharts);
-                }, 500);
-              }
-            });
-            break;
+      setTimeout(async () => {
+        try {
+          await this.exportChart(chart, chartNames[chart]);
+          completed++;
+          const statusElement = document.getElementById(`status-${chart}`);
+          if (statusElement) statusElement.textContent = '✅ Exported';
+          const progressElement = document.getElementById('export-progress');
+          if (progressElement) progressElement.style.width = `${(completed / total) * 100}%`;
+          
+          if (completed === total) {
+            setTimeout(() => {
+              Swal.close();
+              this.showExportSuccess(selectedCharts);
+            }, 500);
+          }
+        } catch (error) {
+          console.error(`Export failed for ${chart}:`, error);
+          const statusElement = document.getElementById(`status-${chart}`);
+          if (statusElement) statusElement.textContent = '❌ Failed';
+          completed++;
         }
-      }, index * 1000); // 1 second delay between each export
+      }, index * 800);
     });
   }
 
-  private updateExportStatus(chart: string, status: string): void {
-    const element = document.getElementById(`export-status-${chart}`);
-    if (element) {
-      element.textContent = status;
-    }
-  }
-
-  private exportScatterChart(): Promise<void> {
-    this.updateExportStatus('scatter', '📤');
-    return new Promise((resolve) => {
-      const scatterElement = document.querySelector('app-scatter-chart');
-      if (scatterElement) {
-        const parentContainer = scatterElement.closest('.bg-white.rounded-2xl');
-        
-        html2canvas(parentContainer as HTMLElement, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false,
-          useCORS: true
-        }).then(canvas => {
-          this.downloadImage(canvas, 'scatter-chart');
-          this.updateExportStatus('scatter', '✅');
-          resolve();
-        }).catch(error => {
-          console.error('Scatter chart export error:', error);
-          this.updateExportStatus('scatter', '❌');
-          resolve();
-        });
-      } else {
-        this.updateExportStatus('scatter', '❌');
-        resolve();
+  private exportChart(chart: string, filename: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let element = null;
+      
+      switch(chart) {
+        case 'scatter':
+          element = document.querySelector('app-scatter-chart')?.closest('.bg-white.rounded-2xl');
+          break;
+        case 'bar':
+          element = document.querySelector('app-bar-chart')?.closest('.bg-white.rounded-2xl');
+          break;
+        case 'donuts1':
+          element = document.querySelectorAll('.bg-white.rounded-2xl')[2];
+          break;
+        case 'donuts2':
+          element = document.querySelectorAll('.bg-white.rounded-2xl')[3];
+          break;
       }
-    });
-  }
 
-  private exportBarChart(): Promise<void> {
-    this.updateExportStatus('bar', '📤');
-    return new Promise((resolve) => {
-      const barElement = document.querySelector('app-bar-chart');
-      if (barElement) {
-        const parentContainer = barElement.closest('.bg-white.rounded-2xl');
-        
-        html2canvas(parentContainer as HTMLElement, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false,
-          useCORS: true
-        }).then(canvas => {
-          this.downloadImage(canvas, 'bar-chart');
-          this.updateExportStatus('bar', '✅');
-          resolve();
-        }).catch(error => {
-          console.error('Bar chart export error:', error);
-          this.updateExportStatus('bar', '❌');
-          resolve();
-        });
-      } else {
-        this.updateExportStatus('bar', '❌');
-        resolve();
+      if (!element) {
+        reject(new Error('Element not found'));
+        return;
       }
-    });
-  }
 
-  private exportDonutGroup1(): Promise<void> {
-    this.updateExportStatus('donuts1', '📤');
-    return new Promise((resolve) => {
-      const donutContainer = document.querySelector('.grid-cols-5')?.parentElement;
-      if (donutContainer) {
-        html2canvas(donutContainer as HTMLElement, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false,
-          useCORS: true
-        }).then(canvas => {
-          this.downloadImage(canvas, 'donut-charts-1-5');
-          this.updateExportStatus('donuts1', '✅');
-          resolve();
-        }).catch(error => {
-          console.error('Donut group 1 export error:', error);
-          this.updateExportStatus('donuts1', '❌');
-          resolve();
-        });
-      } else {
-        this.updateExportStatus('donuts1', '❌');
+      html2canvas(element as HTMLElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      }).then(canvas => {
+        this.downloadImage(canvas, filename);
         resolve();
-      }
-    });
-  }
-
-  private exportDonutGroup2(): Promise<void> {
-    this.updateExportStatus('donuts2', '📤');
-    return new Promise((resolve) => {
-      const donutContainer = document.querySelector('.grid-cols-4')?.parentElement;
-      if (donutContainer) {
-        html2canvas(donutContainer as HTMLElement, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false,
-          useCORS: true
-        }).then(canvas => {
-          this.downloadImage(canvas, 'donut-charts-6-9');
-          this.updateExportStatus('donuts2', '✅');
-          resolve();
-        }).catch(error => {
-          console.error('Donut group 2 export error:', error);
-          this.updateExportStatus('donuts2', '❌');
-          resolve();
-        });
-      } else {
-        this.updateExportStatus('donuts2', '❌');
-        resolve();
-      }
+      }).catch(reject);
     });
   }
 
@@ -735,48 +739,45 @@ private sendToBackendAPI(payload: any): void {
     const imgData = canvas.toDataURL('image/png');
     const link = document.createElement('a');
     link.href = imgData;
-    link.download = `${filename}-${new Date().toISOString().slice(0,10)}.png`;
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    link.download = `survey-dashboard-${filename}-${date}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }
 
   private showExportSuccess(selectedCharts: string[]): void {
-    const chartNames: { [key: string]: string } = {
-      'scatter': 'scatter-chart',
-      'bar': 'bar-chart',
-      'donuts1': 'donut-charts-1-5',
-      'donuts2': 'donut-charts-6-9'
-    };
-
     const dateStr = new Date().toISOString().slice(0,10);
     
     Swal.fire({
       title: 'Export Complete!',
       html: `
-        <div class="text-center">
-          <div class="mb-4">
-            <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+        <div class="text-center space-y-4">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+            <svg class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          <p class="text-sm mb-2" style="color: #432338;">${selectedCharts.length} image file(s) have been downloaded:</p>
-          <div class="text-xs space-y-1 p-3 rounded-lg bg-[#FFE1F7]/30 max-h-40 overflow-y-auto" style="color: #432338;">
-            ${selectedCharts.map((chart, index) => `
-              <div>${index + 1}. ${chartNames[chart]}-${dateStr}.png</div>
+          <div>
+            <h3 class="text-lg font-semibold" style="color: #371A2D;">${selectedCharts.length} File${selectedCharts.length > 1 ? 's' : ''} Downloaded</h3>
+          </div>
+          <div class="text-left space-y-2">
+            ${selectedCharts.map((chart, i) => `
+              <div class="flex items-center space-x-3 p-2">
+                <div class="h-8 w-8 rounded-full bg-[#FFE1F7] flex items-center justify-center">
+                  <span class="text-xs font-bold" style="color: #F77FBE;">${i + 1}</span>
+                </div>
+                <div class="text-sm" style="color: #432338;">
+                  ${this.getChartDisplayName(chart)}-${dateStr}.png
+                </div>
+              </div>
             `).join('')}
           </div>
         </div>
       `,
       icon: 'success',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#F77FBE',
-      background: '#ffffff',
-      customClass: {
-        popup: 'rounded-xl'
-      }
+      confirmButtonColor: '#F77FBE'
     });
   }
 }

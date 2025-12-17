@@ -12,14 +12,8 @@ export class DonutChartComponent implements AfterViewInit, OnChanges, OnDestroy 
   @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
   @Input() dimensionData: any = null;
   @Input() index: number = 0;
-  
-  private myChart: any = null;
 
-  // Color palette
-  private readonly colors = [
-    '#5070dd', '#b6d634', '#ff994d', '#fb628b',
-    '#0ca8df', '#ffd10a', '#785db0', '#3fbe95', '#ff6b6b'
-  ];
+  private myChart: any = null;
 
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -47,39 +41,61 @@ export class DonutChartComponent implements AfterViewInit, OnChanges, OnDestroy 
     container.style.height = '100%';
     container.style.width = '100%';
 
-    const color = this.colors[this.index % this.colors.length];
     const data = this.dimensionData.value || 0;
+
+    // 🔴🟡🟢 COLOR LOGIC (ONLY CHANGE)
+    let color = '#ef4444'; // red (default)
+    if (data >= 80) {
+      color = '#22c55e';   // green
+    } else if (data >= 60) {
+      color = '#facc15';   // yellow
+    }
 
     const option = {
       backgroundColor: 'transparent',
       tooltip: { show: false },
+
       series: [
         {
           type: 'pie',
           radius: ['50%', '75%'],
           center: ['50%', '50%'],
+          silent: false,
           avoidLabelOverlap: false,
+
           label: {
             show: true,
             position: 'center',
-            formatter: '{c}%',
-            fontSize: 14,
-            fontWeight: 'bold',
+            formatter: `${data}%`,
+            fontSize: 9,
+            fontWeight: '600',
             color: '#371A2D',
             fontFamily: 'Poppins'
           },
+
           emphasis: {
+            scale: false,
             label: {
               show: true,
-              fontSize: 16,
-              fontWeight: 'bold',
-              color: '#371A2D'
+              fontSize: 10
             }
           },
+
           labelLine: { show: false },
+
           data: [
-            { value: data, name: 'Score', itemStyle: { color: color } },
-            { value: 100 - data, name: 'Remaining', itemStyle: { color: '#FFE1F7' } }
+            {
+              value: data,
+              name: 'Score',
+              itemStyle: { color },
+              emphasis: { scale: false }
+            },
+            {
+              value: 100 - data,
+              name: 'Remaining',
+              itemStyle: { color: '#FFE1F7' },
+              silent: true
+            }
           ]
         }
       ]
